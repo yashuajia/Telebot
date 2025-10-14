@@ -26,6 +26,11 @@ public class Zone : MonoBehaviour
     [Header("可选：用于重叠优先级的排序，数值越大优先级越高")]
     public int priority = 0;
 
+    void Start()
+    {
+        areaMaskTilemap.GetComponent<TilemapRenderer>().enabled = false;
+    }
+
     public bool IsWall(Vector3Int gridPos)
     {
         return wallTilemap.HasTile(gridPos);

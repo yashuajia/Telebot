@@ -3,7 +3,8 @@ using System.Collections;
 using UnityEngine;
 
 
-public class TeleportBullet : GridObject
+public class TeleportBullet : MonoBehaviour
+//子弹不是gridobject？？
 {
     [SerializeField] private Animator bulletAnimator;
     [SerializeField] private SpriteRenderer bulletSprite;
@@ -11,45 +12,75 @@ public class TeleportBullet : GridObject
     [SerializeField] private float moveSpeed = 16f;
 
     private Vector3Int currentDirection;
+    private Vector3Int currentGridPosition;
     private Action<OnHitInfo> onBulletDestroyCallback;
     private bool isMoving = false;
+
+
 
     public float CurrentSpeed => moveSpeed;
     public Vector3Int CurrentDirection => currentDirection;
     public bool IsMoving => isMoving;
 
-    protected override void Start()
-    {
-    //不要gridobj的start
-    }
+
 
     public void Initialize(Vector3Int startGridPos, Vector3Int startDirection, Action<OnHitInfo> onBulletDestroy)
     {
         isMoving = true;
-        this.transform.position = GridManager.Instance.GridToWorld(startGridPos + startDirection);
-        SnapToGrid();
         onBulletDestroyCallback = onBulletDestroy;
-        AddToGridAt(startGridPos + startDirection);
+        currentGridPosition = startGridPos;
+
+        this.transform.position = GridManager.Instance.GridToWorld(startGridPos + startDirection);
         SetBulletDirection(startDirection);
-        StartCoroutine(Move(startDirection));
+
+        GridUtils.SnapToGrid(this.transform);
+
+        StartCoroutine(Move());
 
     }
-    private IEnumerator Move(Vector3Int startDirection)
+    private IEnumerator Move()
     {
-        currentDirection = startDirection;
         Vector3Int nextGridPos;
+        bool shouldStop;
 
         while (isMoving)
         {
-            nextGridPos = this.GridPosition + currentDirection;
-            if (GridManager.Instance.IsOccupied(nextGridPos))
+            nextGridPos = currentGridPosition + currentDirection;
+            if (!GridManager.Instance.IsOccupied(nextGridPos))
             {
-                OnHit(new OnHitInfo(nextGridPos, currentDirection, this.gameObject));
-                yield break;
+                Debug.Log("not occupied");
+                yield return MoveAnimation(nextGridPos);
+                continue;
             }
 
+            GridManager.Instance.TryGetGridObjectAt(nextGridPos, out GridObject hitObject, out bool isWall);
+            if (isWall)
+            {
+                Debug.Log("hitwall");
+                shouldStop = true;//hit wall
+            }
+            else
+            {
+                IOnHit hittable = hitObject as IOnHit;
+                if (hittable == null)//没有受击方法
+                {
+                    Debug.Log("hit something");
+                    Debug.Log(hitObject);
+                    shouldStop = true;
+                }
+                else
+                {
+                    OnHitInfo onHitInfo = new OnHitInfo(nextGridPos, currentDirection, this.gameObject);
+                    shouldStop = hittable.BlockBullet(onHitInfo);
+                    hittable.OnHit(onHitInfo);
+                }
+            }
 
-            yield return MoveAnimation(nextGridPos);
+            if (shouldStop)
+            {
+                TerminateBullet(nextGridPos);
+                yield break;
+            }
         }
 
     }
@@ -67,13 +98,15 @@ public class TeleportBullet : GridObject
             yield return null;
         }
 
-        MoveToGridPosition(targetGridPos);
-        SnapToGrid();
+        GridUtils.SnapToGrid(this.transform);
+        currentGridPosition = targetGridPos;
     }
 
     private void SetBulletDirection(Vector3Int direction)
     {
         if (bulletSprite == null) return;
+
+        currentDirection = direction;
 
         // 重置旋转和翻转
         transform.rotation = Quaternion.identity;
@@ -98,28 +131,19 @@ public class TeleportBullet : GridObject
         }
     }
 
-    private void OnHit(OnHitInfo bulletHitInfo)
+    private void TerminateBullet(Vector3Int stopGridPos)
     {
         isMoving = false;
-        GridObject hitObject = GridManager.Instance.GetGridObjectAt(bulletHitInfo.GridPos);
-        if (hitObject == null)//hitwall
-        {
-            StopAllCoroutines();
-            onBulletDestroyCallback?.Invoke(bulletHitInfo);
-            Destroy(gameObject, 0.1f);
-            return;
-        }
-
         StopAllCoroutines();
-        onBulletDestroyCallback?.Invoke(bulletHitInfo);
+        Debug.Log($"bullet terminate at {stopGridPos}");
+        OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this.gameObject);
+
+        onBulletDestroyCallback?.Invoke(onHitInfo);
         Destroy(gameObject, 0.1f);
-        return;
-        //return for now, add more logic on hitobj later
     }
 
-    protected override void OnDestroy()
+    void OnDestroy()
     {
-        base.OnDestroy();
         StopAllCoroutines();
         onBulletDestroyCallback = null;
     }

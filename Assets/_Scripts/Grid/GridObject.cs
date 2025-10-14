@@ -14,22 +14,19 @@ public class GridObject : MonoBehaviour
     // 当前网格位置（整数坐标）
     private Vector3Int currentGridPosition;
     private Vector3Int lastKnownPosition;//关闭的时候记录，然后重启时使用
-    private Zone currentZone;
     private bool isRegistered = false;  // 明确追踪注册状态
     
     public Vector3Int GridPosition => currentGridPosition;
-    public Zone CurrentZone => currentZone;
     public bool IsRegistered => isRegistered;
 
     public event Action<Vector3Int> OnGridPosChange;
-    public event Action<Vector3Int> OnNeighborChange;
+    public event Action<Vector3Int> OnNeighborChange;//这俩玩意得扔了？？
 
     
     #region Unity 生命周期
 
     protected virtual void Start()
     {
-        DetermineZone();
         RegisterToGrid();
     }
     
@@ -44,25 +41,7 @@ public class GridObject : MonoBehaviour
     #endregion
 
     #region 注册/注销（内部使用）
-
-    private void DetermineZone()
-    {
-        Zone parentZone = GetComponentInParent<Zone>();
-        if (parentZone != null)
-        {
-            currentZone = parentZone;
-            //Debug.Log($"{name} 属于静态 Zone: {currentZone.name}");
-            return;
-        }
-        
-        // 回退到 GridManager 的当前 Zone（动态对象）
-        if (GridManager.Instance != null)
-        {
-            currentZone = GridManager.Instance.GetCurrentZone();
-            //Debug.Log($"{name} 使用动态 Zone: {currentZone?.name}");
-        }
-    }
-    
+ 
     /// <summary>
     /// 注册到网格系统（通常在 Start 调用）
     /// </summary>
@@ -70,14 +49,9 @@ public class GridObject : MonoBehaviour
     {
         if (isRegistered) return;
         if (GridManager.Instance == null) return;
-        if (currentZone == null)
-        {
-            Debug.LogError($"{name}: Zone 为 null，无法注册！");
-            return;
-        }
 
         Vector3Int targetPos = GridManager.Instance.WorldToGrid(transform.position);
-        bool success = GridManager.Instance.RegisterGridObject(this, targetPos, currentZone);
+        bool success = GridManager.Instance.RegisterGridObject(this, targetPos);
 
         if (success)
         {
@@ -101,7 +75,7 @@ public class GridObject : MonoBehaviour
         
         if (GridManager.Instance != null)
         {
-            GridManager.Instance.UnregisterGridObject(this, currentGridPosition, currentZone);
+            GridManager.Instance.UnregisterGridObject(this, currentGridPosition);
         }
         
         lastKnownPosition = currentGridPosition;
@@ -139,13 +113,13 @@ public class GridObject : MonoBehaviour
         if (GridManager.Instance == null) return false;
         
         // 检查原位置是否可用
-        if (GridManager.Instance.IsOccupied(lastKnownPosition, currentZone))
+        if (GridManager.Instance.IsOccupied(lastKnownPosition))
         {
             Debug.LogWarning($"{name}: 原位置 {lastKnownPosition} 已被占用!");
             return false;
         }
         
-        bool success = GridManager.Instance.RegisterGridObject(this, lastKnownPosition, currentZone);
+        bool success = GridManager.Instance.RegisterGridObject(this, lastKnownPosition);
         
         if (success)
         {
@@ -174,13 +148,13 @@ public class GridObject : MonoBehaviour
         
         if (GridManager.Instance == null) return false;
         
-        if (GridManager.Instance.IsOccupied(targetGridPos, currentZone))
+        if (GridManager.Instance.IsOccupied(targetGridPos))
         {
             return false;
         }
         
         bool success = GridManager.Instance.UpdateGridObjectPosition(
-            this, currentGridPosition, targetGridPos, currentZone
+            this, currentGridPosition, targetGridPos
         );
 
         if (success)
@@ -207,12 +181,12 @@ public class GridObject : MonoBehaviour
             return MoveToGridPosition(targetPos);
         }
         
-        if (GridManager.Instance.IsOccupied(targetPos, currentZone))
+        if (GridManager.Instance.IsOccupied(targetPos))
         {
             return false;
         }
         
-        bool success = GridManager.Instance.RegisterGridObject(this, targetPos, currentZone);
+        bool success = GridManager.Instance.RegisterGridObject(this, targetPos);
 
         if (!success)
         {
@@ -226,7 +200,7 @@ public class GridObject : MonoBehaviour
         OnGridPosChange?.Invoke(targetPos);
         foreach (Vector3Int neighborGridPos in this.GetAdjacentGridPositions())
         {
-            GridObject neighborObj = GridManager.Instance.GetGridObjectAt(neighborGridPos);
+            GridManager.Instance.TryGetGridObjectAt(neighborGridPos, out GridObject neighborObj);
             if (neighborObj == null) continue;
             neighborObj.OnNeighborChange?.Invoke(targetPos);
         }
@@ -304,7 +278,7 @@ public class GridObject : MonoBehaviour
         if (GridManager.Instance == null) return new Vector3Int[0];
         
         var walkable = GridManager.Instance.GetWalkableNeighbors(
-            currentGridPosition, currentZone, includeDiagonals
+            currentGridPosition, includeDiagonals
         );
         return walkable.ToArray();
     }
@@ -375,31 +349,6 @@ public class GridObject : MonoBehaviour
     
     #endregion
     
-    #region Zone切换
-    
-    /// <summary>
-    /// 切换到新的Zone
-    /// </summary>
-    public void SwitchToZone(Zone newZone, Vector3Int newGridPos)
-    {
-        if (GridManager.Instance == null) return;
-        
-        // 从旧Zone注销
-        GridManager.Instance.UnregisterGridObject(this, currentGridPosition, currentZone);
-        
-        // 更新Zone和位置
-        currentZone = newZone;
-        currentGridPosition = newGridPos;
-        
-        // 注册到新Zone
-        GridManager.Instance.RegisterGridObject(this, currentGridPosition, currentZone);
-        
-        // 更新世界坐标
-        SnapToGrid();
-    }
-    
-    #endregion
-    
     #region 调试辅助
     
     protected virtual void OnDrawGizmos()
@@ -436,7 +385,7 @@ public class GridObject : MonoBehaviour
         Debug.Log($"=== {gameObject.name} ===\n" +
                   $"Grid Position: {currentGridPosition}\n" +
                   $"World Position: {transform.position}\n" +
-                  $"Zone: {currentZone?.name ?? "None"}");
+                  $"Zone: {GridManager.Instance.GetZoneAtGridPosition(currentGridPosition)?.name ?? "None"}");
     }
     
     #endregion

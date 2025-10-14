@@ -61,7 +61,7 @@ public class PlayerGridControl : MonoBehaviour
         if (GridManager.Instance.IsOccupied(gridPosDown))
         //这里需要更新，最好把icanstand搞正常一点，而且isoccupied最好不要作为体积检测
         {
-            GridObject objDown = GridManager.Instance.GetGridObjectAt(gridPosDown);
+            GridManager.Instance.TryGetGridObjectAt(gridPosDown, out GridObject objDown);
             if (objDown == null) return true; //the under position is a wall tile
             objDown.TryGetComponent<ICanStand>(out var ICanStand);
             if (ICanStand.CanStand)

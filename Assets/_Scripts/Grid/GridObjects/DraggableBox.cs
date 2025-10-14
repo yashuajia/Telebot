@@ -75,7 +75,7 @@ public class DraggableBox : GridObject, ICanStand, ICanDrag
         
         // 更新目标位置（如果可用）
         if (newGridPos != targetGridPosition && 
-            !GridManager.Instance.IsOccupied(newGridPos, CurrentZone))
+            !GridManager.Instance.IsOccupied(newGridPos))
         {
             targetGridPosition = newGridPos;
         }
