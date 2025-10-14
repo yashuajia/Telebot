@@ -11,22 +11,24 @@ public class TeleportBullet : GridObject
     [SerializeField] private float moveSpeed = 16f;
 
     private Vector3Int currentDirection;
-
-    private Action<BulletHitInfo> onHitCallback;
-
+    private Action<OnHitInfo> onBulletDestroyCallback;
     private bool isMoving = false;
+
+    public float CurrentSpeed => moveSpeed;
+    public Vector3Int CurrentDirection => currentDirection;
+    public bool IsMoving => isMoving;
 
     protected override void Start()
     {
-
+    //不要gridobj的start
     }
 
-    public void Initialize(Vector3Int startGridPos, Vector3Int startDirection, Action<BulletHitInfo> callback)
+    public void Initialize(Vector3Int startGridPos, Vector3Int startDirection, Action<OnHitInfo> onBulletDestroy)
     {
         isMoving = true;
         this.transform.position = GridManager.Instance.GridToWorld(startGridPos + startDirection);
         SnapToGrid();
-        onHitCallback = callback;
+        onBulletDestroyCallback = onBulletDestroy;
         AddToGridAt(startGridPos + startDirection);
         SetBulletDirection(startDirection);
         StartCoroutine(Move(startDirection));
@@ -42,7 +44,7 @@ public class TeleportBullet : GridObject
             nextGridPos = this.GridPosition + currentDirection;
             if (GridManager.Instance.IsOccupied(nextGridPos))
             {
-                OnHit(new BulletHitInfo(nextGridPos, currentDirection));
+                OnHit(new OnHitInfo(nextGridPos, currentDirection, this.gameObject));
                 yield break;
             }
 
@@ -96,20 +98,20 @@ public class TeleportBullet : GridObject
         }
     }
 
-    private void OnHit(BulletHitInfo bulletHitInfo)
+    private void OnHit(OnHitInfo bulletHitInfo)
     {
         isMoving = false;
         GridObject hitObject = GridManager.Instance.GetGridObjectAt(bulletHitInfo.GridPos);
-        if (hitObject == null)
+        if (hitObject == null)//hitwall
         {
             StopAllCoroutines();
-            onHitCallback?.Invoke(bulletHitInfo);
+            onBulletDestroyCallback?.Invoke(bulletHitInfo);
             Destroy(gameObject, 0.1f);
             return;
         }
 
         StopAllCoroutines();
-        onHitCallback?.Invoke(bulletHitInfo);
+        onBulletDestroyCallback?.Invoke(bulletHitInfo);
         Destroy(gameObject, 0.1f);
         return;
         //return for now, add more logic on hitobj later
@@ -119,7 +121,7 @@ public class TeleportBullet : GridObject
     {
         base.OnDestroy();
         StopAllCoroutines();
-        onHitCallback = null;
+        onBulletDestroyCallback = null;
     }
 
 }

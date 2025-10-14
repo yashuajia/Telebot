@@ -405,23 +405,24 @@ public class GridObject : MonoBehaviour
     protected virtual void OnDrawGizmos()
     {
         if (!showGridGizmos || GridManager.Instance == null) return;
-        
-        // 获取网格世界坐标
+
         Vector3 gridWorldPos = GridManager.Instance.GridToWorld(currentGridPosition);
-        
-        // 绘制网格单元
-        Gizmos.color = Color.green;
+
+        // 边框颜色：已注册=绿色，未注册=灰色
+        Gizmos.color = isRegistered ? Color.green : Color.gray;
         Gizmos.DrawWireCube(gridWorldPos, new Vector3(1f, 1f, 0.1f));
-        
-        // 绘制中心点
-        Gizmos.color = Color.red;
+
+        // 中心点颜色：已注册=红色，未注册=黄色
+        Gizmos.color = isRegistered ? Color.red : Color.yellow;
         Gizmos.DrawSphere(gridWorldPos, 0.1f);
-        
-        // 显示网格坐标
+
         #if UNITY_EDITOR
+        // 标注里附带注册状态
         UnityEditor.Handles.Label(
             gridWorldPos + Vector3.up * 0.6f,
-            $"{gameObject.name}\nGrid: {currentGridPosition}"
+            isRegistered
+                ? $"{gameObject.name}\nGrid: {currentGridPosition}"
+                : $"{gameObject.name}\nGrid: {currentGridPosition} (Unregistered)"
         );
         #endif
     }

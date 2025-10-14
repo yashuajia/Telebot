@@ -2,17 +2,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 
-public struct BulletHitInfo
-{
-    public Vector3Int GridPos;
-    public Vector3Int HitDirection;
 
-    public BulletHitInfo(Vector3Int gridPos, Vector3Int hitDirection)
-    {
-        GridPos = gridPos;
-        HitDirection = hitDirection;
-    }
-}
 public class TeleportLaserSystem : MonoBehaviour
 {
 
@@ -71,7 +61,7 @@ public class TeleportLaserSystem : MonoBehaviour
         roomCameraController.SetTarget(bullet.transform);
     }
 
-    void OnBulletHit(BulletHitInfo bulletHitInfo)
+    void OnBulletHit(OnHitInfo bulletHitInfo)
     {
         isFiring = false;
         Debug.Log(bulletHitInfo.GridPos);

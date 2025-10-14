@@ -125,35 +125,66 @@ public class GridManager : Singleton<GridManager>
     {
         return currentZone;
     }
-    
+
     #endregion
-    
+
     #region 占用检测
-    
+
     /// <summary>
     /// 检查指定网格位置是否被占用
     /// </summary>
+
+    //把wall也当成一个gridobj
+    
     public bool IsOccupied(Vector3Int gridPos, Zone zone = null)
     {
         Zone checkZone = zone ?? currentZone;
-        
+
         if (checkZone == null)
         {
             Debug.LogWarning("检查占用时Zone为null!");
             return false;
         }
-        
+
         // 检查静态地形(Tilemap)
-        if (checkZone.HasTile(gridPos))
+        if (checkZone.IsWall(gridPos))
             return true;
-        
+
         // 检查动态对象(GridObject字典)
-        if (zoneGridObjects.ContainsKey(checkZone) && 
+        if (zoneGridObjects.ContainsKey(checkZone) &&
             zoneGridObjects[checkZone].ContainsKey(gridPos))
             return true;
-        
+
         return false;
     }
+
+    public bool IsWall(Vector3Int gridPos, Zone zone = null)
+    {
+        Zone checkZone = zone ?? currentZone;
+
+        if (checkZone == null)
+        {
+            Debug.LogWarning("检查占用时Zone为null!");
+            return false;
+        }
+
+        return checkZone.IsWall(gridPos);
+    }
+
+    /// <summary>
+    /// 获取指定网格位置的GridObject
+    /// </summary>
+    public GridObject GetGridObjectAt(Vector3Int gridPos, Zone zone = null)
+    {
+        Zone targetZone = zone ?? currentZone;
+        
+        if (targetZone == null || !zoneGridObjects.ContainsKey(targetZone))
+            return null;
+        
+        zoneGridObjects[targetZone].TryGetValue(gridPos, out GridObject obj);
+        return obj;
+    }
+
     
     /// <summary>
     /// 检查多个网格位置是否都未被占用
@@ -247,29 +278,15 @@ public class GridManager : Singleton<GridManager>
     }
     
     /// <summary>
-    /// 获取指定网格位置的GridObject
-    /// </summary>
-    public GridObject GetGridObjectAt(Vector3Int gridPos, Zone zone = null)
-    {
-        Zone targetZone = zone ?? currentZone;
-        
-        if (targetZone == null || !zoneGridObjects.ContainsKey(targetZone))
-            return null;
-        
-        zoneGridObjects[targetZone].TryGetValue(gridPos, out GridObject obj);
-        return obj;
-    }
-    
-    /// <summary>
     /// 获取指定Zone的所有GridObject
     /// </summary>
     public List<GridObject> GetAllGridObjectsInZone(Zone zone = null)
     {
         Zone targetZone = zone ?? currentZone;
-        
+
         if (targetZone == null || !zoneGridObjects.ContainsKey(targetZone))
             return new List<GridObject>();
-        
+
         return new List<GridObject>(zoneGridObjects[targetZone].Values);
     }
     
