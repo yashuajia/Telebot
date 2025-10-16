@@ -167,6 +167,13 @@ public class GridManager : Singleton<GridManager>
         return TryGetGridObjectAt(gridPos, out gridObject, out bool _);
     }
 
+    public bool TryGetWallTileAt(Vector3Int gridPos, out TileBase tile)
+    {
+        Zone targetZone = GetZoneAtGridPosition(gridPos);
+        tile = targetZone.GetWallTile(gridPos);
+        return tile == null;
+    }
+
 
     /// <summary>
     /// 检查多个网格位置是否都未被占用

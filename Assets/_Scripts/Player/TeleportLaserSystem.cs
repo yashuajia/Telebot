@@ -65,7 +65,10 @@ public class TeleportLaserSystem : MonoBehaviour
     {
         isFiring = false;
         Debug.Log(bulletHitInfo.GridPos);
-        transform.position = GridManager.Instance.GridToWorld(bulletHitInfo.GridPos - bulletHitInfo.HitDirection);
+        if (bulletHitInfo.Bullet.Doteleport)
+        {
+            transform.position = GridManager.Instance.GridToWorld(bulletHitInfo.GridPos - bulletHitInfo.HitDirection);            
+        }
         roomCameraController.SetTarget(this.transform);
     }
 

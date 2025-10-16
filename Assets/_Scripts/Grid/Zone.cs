@@ -46,4 +46,9 @@ public class Zone : MonoBehaviour
         if (areaMaskTilemap == null) return false;
         return areaMaskTilemap.HasTile(cell);
     }
+
+    public TileBase GetWallTile(Vector3Int gridpos)
+    {
+        return wallTilemap.GetTile(gridpos);
+    }
 }

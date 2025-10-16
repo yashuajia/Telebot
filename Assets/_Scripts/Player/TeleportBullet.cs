@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 
 public class TeleportBullet : MonoBehaviour
@@ -16,11 +17,14 @@ public class TeleportBullet : MonoBehaviour
     private Action<OnHitInfo> onBulletDestroyCallback;
     private bool isMoving = false;
 
+    private bool doTeleport = true;
+
 
 
     public float CurrentSpeed => moveSpeed;
     public Vector3Int CurrentDirection => currentDirection;
     public bool IsMoving => isMoving;
+    public bool Doteleport => doTeleport;
 
 
 
@@ -48,32 +52,34 @@ public class TeleportBullet : MonoBehaviour
             nextGridPos = currentGridPosition + currentDirection;
             if (!GridManager.Instance.IsOccupied(nextGridPos))
             {
-                Debug.Log("not occupied");
+                //Debug.Log("not occupied");
                 yield return MoveAnimation(nextGridPos);
                 continue;
             }
 
             GridManager.Instance.TryGetGridObjectAt(nextGridPos, out GridObject hitObject, out bool isWall);
+            IBulletInteract hittable = null;
             if (isWall)
             {
-                Debug.Log("hitwall");
-                shouldStop = true;//hit wall
+                GridManager.Instance.TryGetWallTileAt(nextGridPos, out TileBase tile);
+                hittable = tile as IBulletInteract;
             }
             else
             {
-                IOnHit hittable = hitObject as IOnHit;
-                if (hittable == null)//没有受击方法
-                {
-                    Debug.Log("hit something");
-                    Debug.Log(hitObject);
-                    shouldStop = true;
-                }
-                else
-                {
-                    OnHitInfo onHitInfo = new OnHitInfo(nextGridPos, currentDirection, this.gameObject);
-                    shouldStop = hittable.BlockBullet(onHitInfo);
-                    hittable.OnHit(onHitInfo);
-                }
+                hittable = hitObject as IBulletInteract;
+            }
+
+            if (hittable == null)//没有受击方法
+            {
+                Debug.Log("hit something");
+                Debug.Log(hitObject);
+                shouldStop = true;
+            }
+            else
+            {
+                OnHitInfo onHitInfo = new OnHitInfo(nextGridPos, currentDirection, this);
+                shouldStop = hittable.BlockBullet(onHitInfo);
+                hittable.OnHit(onHitInfo);
             }
 
             if (shouldStop)
@@ -136,7 +142,7 @@ public class TeleportBullet : MonoBehaviour
         isMoving = false;
         StopAllCoroutines();
         Debug.Log($"bullet terminate at {stopGridPos}");
-        OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this.gameObject);
+        OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this);
 
         onBulletDestroyCallback?.Invoke(onHitInfo);
         Destroy(gameObject, 0.1f);
@@ -146,6 +152,11 @@ public class TeleportBullet : MonoBehaviour
     {
         StopAllCoroutines();
         onBulletDestroyCallback = null;
+    }
+
+    public void ToggleTeleport(bool doTeleport)
+    {
+        this.doTeleport = doTeleport;
     }
 
 }
