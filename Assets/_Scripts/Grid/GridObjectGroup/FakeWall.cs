@@ -1,6 +1,7 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
-[RequireComponent(typeof(PaletteSwapController))]
+[RequireComponent(typeof(ThemeController))]
 public class FakeWall : GridObject, IBulletInteract
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -13,10 +14,19 @@ public class FakeWall : GridObject, IBulletInteract
     private bool isImitateOn = true;
     private bool isBroken = false;
 
+    private FakeWallGroup fakeWallGroup;
+
     protected override void Start()
     {
         base.Start();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        fakeWallGroup = GetComponentInParent<FakeWallGroup>();
+        if (fakeWallGroup == null)
+        {
+            Debug.LogWarning("fakewall has no group");
+        }
+        fakeWallGroup.triggerBreak += BreakWall;
+        fakeWallGroup.triggerRecover += Recover;
     }
 
     public void BreakWall()
@@ -49,6 +59,7 @@ public class FakeWall : GridObject, IBulletInteract
         if (!isBroken)//ofc it is not broken
         {
             onHitInfo.Bullet.ToggleTeleport(false);
+            fakeWallGroup.TriggerBreakAll();
         }
     }
 

@@ -11,6 +11,7 @@ public class TeleportBullet : MonoBehaviour
     [SerializeField] private SpriteRenderer bulletSprite;
 
     [SerializeField] private float moveSpeed = 16f;
+    [SerializeField] private ParticleSystem bulletParticle;
 
     private Vector3Int currentDirection;
     private Vector3Int currentGridPosition;
@@ -115,17 +116,15 @@ public class TeleportBullet : MonoBehaviour
         currentDirection = direction;
 
         // 重置旋转和翻转
-        transform.rotation = Quaternion.identity;
-        bulletSprite.flipX = false;
-        bulletSprite.flipY = false;
+
 
         if (direction == Vector3Int.right)
         {
-            // 默认向右，不需要改变
+            transform.rotation = Quaternion.Euler(0, 0, 0);
         }
         else if (direction == Vector3Int.left)
         {
-            bulletSprite.flipX = true; // 水平翻转
+            transform.rotation = Quaternion.Euler(0, 0, 180);
         }
         else if (direction == Vector3Int.up)
         {

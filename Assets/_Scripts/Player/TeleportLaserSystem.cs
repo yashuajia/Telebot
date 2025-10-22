@@ -15,8 +15,6 @@ public class TeleportLaserSystem : MonoBehaviour
 
     public bool IsFiring => isFiring;
 
-    private RoomCameraController roomCameraController;
-
     void Awake()
     {
 
@@ -24,7 +22,6 @@ public class TeleportLaserSystem : MonoBehaviour
 
     void Start()
     {
-        roomCameraController = Camera.main.GetComponent<RoomCameraController>();
         leftArrow.SetActive(false);
         rightArrow.SetActive(false);
     }
@@ -58,7 +55,7 @@ public class TeleportLaserSystem : MonoBehaviour
         isFiring = true;
         TeleportBullet bullet = Instantiate(bulletPrefab, GridManager.Instance.GridToWorld(startGridPos + direction), quaternion.identity);
         bullet.Initialize(startGridPos, direction, OnBulletHit);
-        roomCameraController.SetTarget(bullet.transform);
+        RoomManager.Instance.SetTarget(bullet.transform);
     }
 
     void OnBulletHit(OnHitInfo bulletHitInfo)
@@ -69,7 +66,7 @@ public class TeleportLaserSystem : MonoBehaviour
         {
             transform.position = GridManager.Instance.GridToWorld(bulletHitInfo.GridPos - bulletHitInfo.HitDirection);            
         }
-        roomCameraController.SetTarget(this.transform);
+        RoomManager.Instance.SetTarget(this.transform);
     }
 
 

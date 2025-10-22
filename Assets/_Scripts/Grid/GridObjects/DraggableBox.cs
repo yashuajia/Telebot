@@ -4,20 +4,19 @@ using UnityEngine;
 /// 可拖拽的网格对象
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
-[RequireComponent(typeof(PaletteSwapController))]
+[RequireComponent(typeof(ThemeController))]
 public class DraggableBox : GridObject, ICanStand, ICanDrag
 {
     [Header("拖动设置")]
     [SerializeField] private float moveSpeed = 15f;
     
     [Header("视觉反馈")]
-    [SerializeField] private SimpleColorPalette highlightPalette;
+    [SerializeField] private Material highlightPaletteMaterial;
     
     private bool isMoving = false;
     private Vector3Int targetGridPosition;
     private Camera mainCamera;
-    private PaletteSwapController paletteSwapController;
-    private SimpleColorPalette originalPalette;
+    private ThemeController themeController;
 
     public bool CanStand => true;
     
@@ -26,8 +25,7 @@ public class DraggableBox : GridObject, ICanStand, ICanDrag
         base.Start();
         
         mainCamera = Camera.main;
-        paletteSwapController = GetComponent<PaletteSwapController>();
-        originalPalette = paletteSwapController.GetCurrentPalette();
+        themeController = GetComponent<ThemeController>();
         targetGridPosition = GridPosition;
     }
     
@@ -55,12 +53,11 @@ public class DraggableBox : GridObject, ICanStand, ICanDrag
     }
 
     #region ICanDrag 实现
-    
+
     public void OnDragStart()
     {
         isMoving = true;
-        originalPalette = paletteSwapController.GetCurrentPalette();
-        paletteSwapController.SetPalette(highlightPalette);
+        themeController.SetOverrideMaterial(highlightPaletteMaterial);
     }
     
     public void OnDragUpdate(Vector2 mouseWorldPos)
@@ -84,7 +81,7 @@ public class DraggableBox : GridObject, ICanStand, ICanDrag
     public void OnDragEnd()
     {
         isMoving = false;
-        paletteSwapController.SetPalette(originalPalette);
+        themeController.RestoreMaterial();
         
         // 确保最终对齐
         if (targetGridPosition != GridPosition)

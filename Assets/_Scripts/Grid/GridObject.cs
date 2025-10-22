@@ -365,15 +365,24 @@ public class GridObject : MonoBehaviour
         Gizmos.color = isRegistered ? Color.red : Color.yellow;
         Gizmos.DrawSphere(gridWorldPos, 0.1f);
 
-        #if UNITY_EDITOR
+        Vector3 labelOffset = Vector3.zero;
+        if (UnityEditor.SceneView.currentDrawingSceneView != null)
+        {
+            // Scene视图不需要偏移（或需要不同的偏移）
+            labelOffset = Vector3.zero;
+        }
+        else
+        {
+            // Game视图需要偏移
+            labelOffset = new Vector3(0, -4f, 0);
+        }
         // 标注里附带注册状态
         UnityEditor.Handles.Label(
-            gridWorldPos + Vector3.up * 0.6f,
+            gridWorldPos + labelOffset,
             isRegistered
                 ? $"{gameObject.name}\nGrid: {currentGridPosition}"
                 : $"{gameObject.name}\nGrid: {currentGridPosition} (Unregistered)"
         );
-        #endif
     }
     
     /// <summary>

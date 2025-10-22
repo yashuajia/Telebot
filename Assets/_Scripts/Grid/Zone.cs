@@ -28,7 +28,7 @@ public class Zone : MonoBehaviour
 
     void Start()
     {
-        areaMaskTilemap.GetComponent<TilemapRenderer>().enabled = false;
+        //areaMaskTilemap.GetComponent<TilemapRenderer>().enabled = false;
     }
 
     public bool IsWall(Vector3Int gridPos)
