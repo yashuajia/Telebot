@@ -59,7 +59,7 @@ public class TeleportBullet : MonoBehaviour
             }
 
             GridManager.Instance.TryGetGridObjectAt(nextGridPos, out GridObject hitObject, out bool isWall);
-            IBulletInteract hittable = null;
+            IBulletInteract hittable;
             if (isWall)
             {
                 GridManager.Instance.TryGetWallTileAt(nextGridPos, out TileBase tile);
@@ -79,8 +79,9 @@ public class TeleportBullet : MonoBehaviour
             else
             {
                 OnHitInfo onHitInfo = new OnHitInfo(nextGridPos, currentDirection, this);
-                shouldStop = hittable.BlockBullet(onHitInfo);
+                //这俩有顺序问题吗？
                 hittable.OnHit(onHitInfo);
+                shouldStop = hittable.BlockBullet(onHitInfo);
             }
 
             if (shouldStop)

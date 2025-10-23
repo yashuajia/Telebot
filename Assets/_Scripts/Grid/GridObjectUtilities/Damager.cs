@@ -1,4 +1,6 @@
 using UnityEngine;
+
+//这个得换一下
 public class Damager : MonoBehaviour
 {
     [Header("Read Alignment's Tooltip For Explanation")]

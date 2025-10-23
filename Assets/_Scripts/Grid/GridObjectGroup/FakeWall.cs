@@ -1,4 +1,4 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(ThemeController))]
@@ -14,13 +14,20 @@ public class FakeWall : GridObject, IBulletInteract
     private bool isImitateOn = true;
     private bool isBroken = false;
 
+    public bool IsBroken => isBroken;
+
     private FakeWallGroup fakeWallGroup;
+
+    private BoxCollider2D boxCollider2D;
 
     protected override void Start()
     {
         base.Start();
         spriteRenderer = GetComponent<SpriteRenderer>();
         fakeWallGroup = GetComponentInParent<FakeWallGroup>();
+        boxCollider2D = GetComponent<BoxCollider2D>();
+
+
         if (fakeWallGroup == null)
         {
             Debug.LogWarning("fakewall has no group");
@@ -35,12 +42,20 @@ public class FakeWall : GridObject, IBulletInteract
         isBroken = true;
         spriteRenderer.sprite = brokenSprite;
 
+        boxCollider2D.enabled = false;
         this.RemoveFromGrid();
     }
 
     public void Recover()
     {
+        if (this.AddBackToGrid() == false)
+        {
+            return;
+        }
+        //如果加回去失败呢？虽然可以用gridobj事件来做到上面物体移开就重新recover，
+        //但是是不是干脆不recover更加有趣一点
         isBroken = false;
+        boxCollider2D.enabled = true;
         if (isImitateOn)
         {
             spriteRenderer.sprite = imitationSprite;
@@ -50,7 +65,6 @@ public class FakeWall : GridObject, IBulletInteract
             spriteRenderer.sprite = solidSprite;
         }
 
-        this.AddBackToGrid();
     }
 
     public void OnHit(OnHitInfo onHitInfo)
