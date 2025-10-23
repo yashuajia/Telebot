@@ -9,8 +9,10 @@ public class FakeWallGroup : MonoBehaviour
     void Start()
     {
         walls = GetComponentsInChildren<FakeWall>();
+        RoomManager.OnRoomChanged += OnRoomChanged;
     }
 
+    //public event Action tryBreak;
     public event Action triggerBreak;
     public event Action triggerRecover;
 
@@ -24,6 +26,11 @@ public class FakeWallGroup : MonoBehaviour
     public void TriggerRecoverAll()
     {
         triggerRecover?.Invoke();
+    }
+
+    public void OnRoomChanged(Vector2Int oldRoomPos, Vector2Int newRoomPos)
+    {
+        TriggerRecoverAll();
     }
 
 }

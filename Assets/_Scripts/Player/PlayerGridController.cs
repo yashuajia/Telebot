@@ -1,9 +1,10 @@
 using UnityEngine;
 
 [RequireComponent(typeof(GridObject))]
-public class PlayerGridControl : MonoBehaviour
+public class PlayerGridController : MonoBehaviour
 {
     private GridObject playerGridObject;
+    public bool IsRegistered => playerGridObject.IsRegistered;
 
     void Awake()
     {
@@ -25,7 +26,7 @@ public class PlayerGridControl : MonoBehaviour
         gridPos = playerGridObject.GridPosition;
         return true;
     }
-    public bool SnapPlayerToGrid()
+    public bool TrySnapPlayerToGrid()
     {
         Vector3Int gridPos = GridManager.Instance.WorldToGrid(this.transform.position);
         Vector3Int gridPosLeft = gridPos + Vector3Int.left;
@@ -55,11 +56,15 @@ public class PlayerGridControl : MonoBehaviour
 
     private bool IsValidPlayerGridPosition(Vector3Int gridPos)
     {
-        if (GridManager.Instance.IsOccupied(gridPos)) return false;
+        if (GridManager.Instance.IsOccupied(gridPos))
+        {
+            return false;
+        }
 
         Vector3Int gridPosDown = gridPos + Vector3Int.down;
         if (GridManager.Instance.IsOccupied(gridPosDown))
         //这里需要更新，最好把icanstand搞正常一点，而且isoccupied最好不要作为体积检测
+        //用layer怎么样
         {
             GridManager.Instance.TryGetGridObjectAt(gridPosDown, out GridObject objDown);
             if (objDown == null) return true; //the under position is a wall tile
