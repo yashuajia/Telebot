@@ -74,7 +74,15 @@ public class GridManager : Singleton<GridManager>
     /// </summary>
     public Vector3 GridToWorld(Vector3Int gridPosition)
     {
-        if (grid == null) return gridPosition;
+        if (grid == null)
+        {
+            // ✅ 回退时也返回格子中心（+0.5 偏移）
+            return new Vector3(
+                gridPosition.x + 0.5f, 
+                gridPosition.y + 0.5f, 
+                gridPosition.z
+            );
+        }
         return grid.GetCellCenterWorld(gridPosition);
     }
 
@@ -171,7 +179,7 @@ public class GridManager : Singleton<GridManager>
     {
         Zone targetZone = GetZoneAtGridPosition(gridPos);
         tile = targetZone.GetWallTile(gridPos);
-        return tile == null;
+        return tile != null;
     }
 
 

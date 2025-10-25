@@ -166,15 +166,16 @@ public class PlayerInputController : MonoBehaviour
 
     void EnablePlayerMovement()
     {
-        playerMovement.EnableMovement(true);
         playerMovement.Rb.bodyType = RigidbodyType2D.Dynamic;
+        playerMovement.EnableMovement(true);
         playerGridControl.UnsnapPlayerToGrid();
     }
     
     void DisablePlayerMovement()
     {
+        playerMovement.ResetMovement();
         playerMovement.EnableMovement(false);
-        playerMovement.Rb.bodyType = RigidbodyType2D.Static;
+        playerMovement.Rb.bodyType = RigidbodyType2D.Kinematic;
     }
 
 

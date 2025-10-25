@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -9,20 +10,25 @@ public class PlayerRespawnController : MonoBehaviour
     [Header("Respawn Settings")]
     [Tooltip("死亡后延迟多少秒重生")]
     [SerializeField] private float delayBeforeRespawn = 1f;
-    
-    private Transform respawnPoint;
-    private Flag currentActiveFlag; // 当前激活的flag引用
+
+    [Tooltip("如果没有激活任何检查点，使用初始位置作为重生点")]
+    [SerializeField] private bool useStartPositionAsFallback = true;
+
+    private Vector3 startPosition;
 
     [Header("Audio (Optional)")]
     [Tooltip("可选：死亡音效")]
     [SerializeField] private AudioClip deathSound;
 
-    [Header("Events")]
-    [SerializeField] private UnityEvent onPlayerDeath;
-    [SerializeField] private UnityEvent onPlayerRespawn;
+    public event Action onPlayerDeath;
+    public event Action<Transform> onPlayerRespawn;
+
+
 
     private bool isDying = false;
     private AudioSource audioSource;
+
+    private Flag currentFlag;
 
     // 公开属性供其他脚本查询
     public bool IsDying => isDying;
@@ -34,12 +40,9 @@ public class PlayerRespawnController : MonoBehaviour
 
     private void Start()
     {
-        // 初始重生点设置为玩家起始位置
-        if (respawnPoint == null)
-        {
-            respawnPoint = transform;
-            Debug.Log("初始重生点设置为玩家起始位置");
-        }
+        // 记录起始位置作为备用重生点
+        startPosition = transform.position;
+        Debug.Log($"玩家起始位置: {startPosition}");
     }
 
     /// <summary>
@@ -48,19 +51,19 @@ public class PlayerRespawnController : MonoBehaviour
     public void Die()
     {
         if (isDying) return; // 防止重复死亡
-        
+
         isDying = true;
-        
+
         Debug.Log("Player died!");
-        
+
         // 播放死亡音效
         if (deathSound != null && audioSource != null)
         {
             audioSource.PlayOneShot(deathSound);
         }
-        
+
         // 触发死亡事件
-        onPlayerDeath.Invoke();
+        onPlayerDeath?.Invoke();
 
         // 延迟重生
         if (delayBeforeRespawn > 0)
@@ -80,86 +83,48 @@ public class PlayerRespawnController : MonoBehaviour
     {
         isDying = false;
 
-        if (respawnPoint != null)
-        {
-            transform.position = respawnPoint.position;
-            Debug.Log("Player respawned at: " + respawnPoint.position);
-        }
-        else
-        {
-            Debug.LogWarning("无法重生：重生点未设置");
-        }
+        // 触发重生事件（Flag会处理位置重置）
+        onPlayerRespawn?.Invoke(this.transform);
 
-        // 触发重生事件
-        onPlayerRespawn.Invoke();
+        // 如果没有任何监听者（没有激活的检查点），使用备用位置
+        if (useStartPositionAsFallback && onPlayerRespawn == null)
+        {
+            transform.position = startPosition;
+            Debug.Log("没有激活的检查点，重生在起始位置");
+        }
     }
 
-    /// <summary>
-    /// 设置新的重生点（通过Transform）
-    /// </summary>
-    public void SetRespawnPoint(Transform newRespawnPoint)
-    {
-        respawnPoint = newRespawnPoint;
-    }
-    
-    /// <summary>
-    /// 激活检查点（由Flag调用）
-    /// </summary>
-    public void ActivateCheckpoint(Flag newFlag)
-    {
-        if (newFlag == null) return;
-        
-        // 如果有旧的flag，先取消激活
-        if (currentActiveFlag != null && currentActiveFlag != newFlag)
-        {
-            currentActiveFlag.SetActive(false);
-        }
-        
-        // 激活新flag
-        newFlag.SetActive(true);
-        currentActiveFlag = newFlag;
-        
-        // 设置重生点到新flag位置
-        respawnPoint = newFlag.transform;
-        
-        Debug.Log($"检查点已更新到: {newFlag.gameObject.name}");
-    }
 
     // ============= 碰撞检测 =============
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // 使用 Damager 组件（如果有）
-        if (collision.gameObject.TryGetComponent(out Damager damager) && damager.enabled)
-        {
-            Die();
-            return;
-        }
+        CheckForDamage(collision.gameObject);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 使用 Damager 组件（如果有）
-        if (collision.gameObject.TryGetComponent(out Damager damager) && damager.enabled)
+        CheckForDamage(collision.gameObject);
+    }
+
+    /// <summary>
+    /// 检查物体是否会造成伤害
+    /// </summary>
+    private void CheckForDamage(GameObject obj)
+    {
+        // 检查Damager组件
+        Damager damager = obj.GetComponent<Damager>();
+        if (damager != null && damager.damageEnabled)
         {
-            Alignment alignment = damager.alignment;
-            
-            // 敌人或环境伤害导致死亡
-            if (alignment == Alignment.Enemy || alignment == Alignment.Environment)
-            {
-                if (!damager.healInstead)
-                {
-                    Die();
-                }
-            }
+            Die();
             return;
         }
 
-        // 使用标签检测
-        if (collision.collider.CompareTag("Enemy") || collision.collider.CompareTag("Death"))
-        {
-            Die();
-        }
+        // // 检查标签（兼容旧系统）
+        // if (obj.CompareTag("Enemy") || obj.CompareTag("Death"))
+        // {
+        //     Die();
+        // }
     }
 
     private void OnValidate()
@@ -169,5 +134,17 @@ public class PlayerRespawnController : MonoBehaviour
         {
             delayBeforeRespawn = 0;
         }
+    }
+
+    public void ChangeRespawnPoint(Flag newflag)
+    {
+        Debug.Log("change respawn");
+        if (currentFlag != null)
+        {
+            currentFlag.Deactivate();
+        }
+
+        currentFlag = newflag;
+        currentFlag.Activate(this);
     }
 }

@@ -20,6 +20,8 @@ public class TeleportBullet : MonoBehaviour
 
     private bool doTeleport = true;
 
+    private bool isTerminated;
+
 
 
     public float CurrentSpeed => moveSpeed;
@@ -53,7 +55,6 @@ public class TeleportBullet : MonoBehaviour
             nextGridPos = currentGridPosition + currentDirection;
             if (!GridManager.Instance.IsOccupied(nextGridPos))
             {
-                //Debug.Log("not occupied");
                 yield return MoveAnimation(nextGridPos);
                 continue;
             }
@@ -139,20 +140,58 @@ public class TeleportBullet : MonoBehaviour
 
     private void TerminateBullet(Vector3Int stopGridPos)
     {
+        if (isTerminated) return;
+        isTerminated = true;
+        
         isMoving = false;
-        StopAllCoroutines();
+        
         Debug.Log($"bullet terminate at {stopGridPos}");
-        OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this);
-
-        onBulletDestroyCallback?.Invoke(onHitInfo);
-        Destroy(gameObject, 0.1f);
+        
+        // 停止粒子
+        if (bulletParticle != null && bulletParticle.isPlaying)
+        {
+            bulletParticle.transform.SetParent(null);
+            bulletParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+        }
+        
+        // 先停止协程
+        StopAllCoroutines();
+        
+        // 保存回调并立即清空
+        var callback = onBulletDestroyCallback;
+        onBulletDestroyCallback = null;
+        
+        // 调用回调
+        if (callback != null)
+        {
+            OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this);
+            callback.Invoke(onHitInfo);
+        }
+        
+        // 销毁对象
+        Destroy(gameObject);
     }
 
     void OnDestroy()
     {
+        // 确保清理
+        isMoving = false;
+        
+        if (bulletParticle != null && bulletParticle.isPlaying)
+        {
+            bulletParticle.transform.SetParent(null);
+            bulletParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+        
         StopAllCoroutines();
         onBulletDestroyCallback = null;
     }
+
+    // void OnDestroy()
+    // {
+    //     StopAllCoroutines();
+    //     onBulletDestroyCallback = null;
+    // }
 
     public void ToggleTeleport(bool doTeleport)
     {

@@ -2,7 +2,31 @@ using UnityEngine;
 
 public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
-    public static T Instance { get; private set; }
+    private static T instance;
+    
+    public static T Instance
+    {
+        get
+        {
+            if (instance == null && !isShuttingDown)
+            {
+                // 在 Editor 模式下也尝试查找
+                instance = FindFirstObjectByType<T>();
+                
+#if UNITY_EDITOR
+                if (instance != null)
+                {
+                    Debug.Log($"[Editor] 找到 {typeof(T).Name} 实例");
+                }
+#endif
+            }
+            return instance;
+        }
+        private set
+        {
+            instance = value;
+        }
+    }
 
     private static bool isShuttingDown = false;
 
