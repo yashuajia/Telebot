@@ -11144,10 +11144,10 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.2
-    y: 0.1
-    width: 0.6
-    height: 0.8
+    x: -0.6
+    y: -0.6
+    width: 1.2
+    height: 1.2
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 34
@@ -47961,6 +47961,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: DraggableBox
       objectReference: {fileID: 0}
+    - target: {fileID: 1457565500872869214, guid: a29cdbc57a302c246b821373ac03a81a, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5448318898958771400, guid: a29cdbc57a302c246b821373ac03a81a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -49155,7 +49159,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OneWayPlatform
   showGridGizmos: 1
-  goDirection: 0
+  gridObjDirection: 0
 --- !u!212 &1581077967
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -50091,7 +50095,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OneWayPlatform
   showGridGizmos: 1
-  goDirection: 0
+  gridObjDirection: 0
 --- !u!212 &1872680123
 SpriteRenderer:
   m_ObjectHideFlags: 0

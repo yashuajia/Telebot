@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 [RequireComponent(typeof(ThemeController))]
-public class DraggableBox : GridObject, ICanStand, ICanDrag
+public class DraggableBox : GridObject, ICanDrag
 {
     [Header("拖动设置")]
     [SerializeField] private float moveSpeed = 15f;

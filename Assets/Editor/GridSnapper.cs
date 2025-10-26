@@ -163,7 +163,11 @@ public class AutoGridSnap
         if (Selection.transforms.Length == 0) return;
 
         GridManager gridManager = GridManager.Instance;
-        if (gridManager == null) return;
+        if (gridManager == null)
+        {
+            Debug.Log("cant find gridmanager");
+            return;
+        }
 
         Undo.RecordObjects(Selection.transforms, "Auto Snap to Grid");
 

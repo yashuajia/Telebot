@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5448318898958771400}
   - component: {fileID: 7807372141890298441}
   - component: {fileID: 2529552944906563023}
-  m_Layer: 10
+  m_Layer: 0
   m_Name: DraggableBox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1457565500872869214}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -48,6 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DraggableBox
   showGridGizmos: 1
+  goDirection: 0
   moveSpeed: 16
   highlightPaletteMaterial: {fileID: 2100000, guid: 66a0db1456b704b41bff14894b4af37a, type: 2}
 --- !u!212 &5448318898958771400

@@ -119,11 +119,11 @@ public class TeleportLaserSystem : MonoBehaviour
             return false;
         }
 
-        Debug.Log($"Laser aiming from grid position: {currentPlayerGridPos}");
+        //Debug.Log($"Laser aiming from grid position: {currentPlayerGridPos}");
 
         // 检查左右是否可以发射（其实该检测能不能让子弹穿透）
-        canShootLeft = !GridManager.Instance.IsOccupied(currentPlayerGridPos + Vector3Int.left);
-        canShootRight = !GridManager.Instance.IsOccupied(currentPlayerGridPos + Vector3Int.right);
+        canShootLeft = CanShootInDirection(currentPlayerGridPos, Vector3Int.left);
+        canShootRight = CanShootInDirection(currentPlayerGridPos, Vector3Int.right);
 
         if (!canShootLeft && !canShootRight)
         {
@@ -137,6 +137,41 @@ public class TeleportLaserSystem : MonoBehaviour
         UpdateArrowDisplay();
 
         return true;
+    }
+
+    /// <summary>
+    /// 检查是否可以从指定位置向指定方向发射
+    /// </summary>
+    private bool CanShootInDirection(Vector3Int startPos, Vector3Int direction)
+    {
+        Vector3Int targetPos = startPos + direction;
+        
+        // 第一格必须不被占用（子弹出生点）
+        if (!GridManager.Instance.IsOccupied(targetPos))
+        {
+            return true;
+        }
+
+        // 如果被占用，检查是否可以穿透
+        if (GridManager.Instance.TryGetGridObjectAt(targetPos, out GridObject gridObj))
+        {
+            var interactable = gridObj.GetComponent<IBulletInteract>();
+            if (interactable != null)
+            {
+                // 创建一个临时的 HitInfo 用于查询
+                OnHitInfo queryInfo = new OnHitInfo(
+                    targetPos, 
+                    direction, 
+                    null // 查询时不需要真实的子弹
+                );
+                
+                // 如果不阻挡，就可以发射
+                return !interactable.IsBlockBullet(queryInfo);
+            }
+        }
+
+        // 默认：被占用且没有交互接口 = 阻挡
+        return false;
     }
 
     void UpdateArrowDisplay()

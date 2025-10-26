@@ -47,51 +47,72 @@ public class TeleportBullet : MonoBehaviour
     }
     private IEnumerator Move()
     {
-        Vector3Int nextGridPos;
-        bool shouldStop;
-
         while (isMoving)
         {
-            nextGridPos = currentGridPosition + currentDirection;
-            if (!GridManager.Instance.IsOccupied(nextGridPos))
+            Vector3Int nextGridPos = currentGridPosition + currentDirection;
+            
+            // 检查碰撞
+            CollisionResult collision = CheckCollision(nextGridPos);
+            
+            if (collision.ShouldStop)
             {
-                yield return MoveAnimation(nextGridPos);
-                continue;
-            }
-
-            GridManager.Instance.TryGetGridObjectAt(nextGridPos, out GridObject hitObject, out bool isWall);
-            IBulletInteract hittable;
-            if (isWall)
-            {
-                GridManager.Instance.TryGetWallTileAt(nextGridPos, out TileBase tile);
-                hittable = tile as IBulletInteract;
-            }
-            else
-            {
-                hittable = hitObject as IBulletInteract;
-            }
-
-            if (hittable == null)//没有受击方法
-            {
-                Debug.Log("hit something");
-                Debug.Log(hitObject);
-                shouldStop = true;
-            }
-            else
-            {
-                OnHitInfo onHitInfo = new OnHitInfo(nextGridPos, currentDirection, this);
-                //这俩有顺序问题吗？
-                hittable.OnHit(onHitInfo);
-                shouldStop = hittable.BlockBullet(onHitInfo);
-            }
-
-            if (shouldStop)
-            {
+                // 终止子弹
                 TerminateBullet(nextGridPos);
                 yield break;
             }
+            
+            // 移动到下一格（无论是空格子还是可穿透的物体）
+            yield return MoveAnimation(nextGridPos);
+        }
+    }
+
+    private struct CollisionResult
+    {
+        public bool ShouldStop;
+        public IBulletInteract HitObject;
+    }
+
+    private CollisionResult CheckCollision(Vector3Int gridPos)
+    {
+        // 空格子 → 不停止
+        if (!GridManager.Instance.IsOccupied(gridPos))
+        {
+            return new CollisionResult { ShouldStop = false, HitObject = null };
         }
 
+        // 获取击中的对象
+        GridManager.Instance.TryGetGridObjectAt(gridPos, out GridObject hitObject, out bool isWall);
+        
+        IBulletInteract hittable;
+        if (isWall)
+        {
+            GridManager.Instance.TryGetWallTileAt(gridPos, out TileBase tile);
+            hittable = tile as IBulletInteract;
+        }
+        else
+        {
+            hittable = hitObject?.GetComponent<IBulletInteract>();
+        }
+
+        // 没有交互接口 → 默认阻挡
+        if (hittable == null)
+        {
+            Debug.Log($"Hit object without IBulletInteract at {gridPos}");
+            return new CollisionResult { ShouldStop = true, HitObject = null };
+        }
+
+        // 调用击中逻辑
+        OnHitInfo onHitInfo = new OnHitInfo(gridPos, currentDirection, this);
+        hittable.OnHit(onHitInfo);
+        
+        // 检查是否阻挡
+        bool isBlocked = hittable.IsBlockBullet(onHitInfo);
+        
+        return new CollisionResult 
+        { 
+            ShouldStop = isBlocked, 
+            HitObject = hittable 
+        };
     }
 
     private IEnumerator MoveAnimation(Vector3Int targetGridPos)

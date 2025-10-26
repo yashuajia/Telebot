@@ -83,7 +83,7 @@ public class FakeWall : GridObject, IBulletInteract
         }
     }
 
-    public bool BlockBullet(OnHitInfo onHitInfo)
+    public bool IsBlockBullet(OnHitInfo onHitInfo)
     {
         return true;
     }

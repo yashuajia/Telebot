@@ -40,7 +40,7 @@ public class WallTile : Tile, IBulletInteract
         return;
     }
 
-    public bool BlockBullet(OnHitInfo hitInfo)
+    public bool IsBlockBullet(OnHitInfo hitInfo)
     {
         return true;
     }

@@ -8,18 +8,19 @@ public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
     {
         get
         {
+#if UNITY_EDITOR
+            // Editor 模式下总是尝试查找
+            if (instance == null)
+            {
+                instance = FindFirstObjectByType<T>();
+            }
+#else
+        // 运行时才检查 isShuttingDown
             if (instance == null && !isShuttingDown)
             {
-                // 在 Editor 模式下也尝试查找
                 instance = FindFirstObjectByType<T>();
-                
-#if UNITY_EDITOR
-                if (instance != null)
-                {
-                    Debug.Log($"[Editor] 找到 {typeof(T).Name} 实例");
-                }
-#endif
             }
+#endif
             return instance;
         }
         private set

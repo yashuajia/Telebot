@@ -27,6 +27,6 @@ public interface IBulletInteract
     /// <summary>
     /// 是否可以阻挡子弹
     /// </summary>
-    bool BlockBullet(OnHitInfo hitInfo);
+    bool IsBlockBullet(OnHitInfo hitInfo);
 
 }
