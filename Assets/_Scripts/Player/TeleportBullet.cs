@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Tilemaps;
 
 
@@ -18,6 +19,8 @@ public class TeleportBullet : MonoBehaviour
     private Action<OnHitInfo> onBulletDestroyCallback;
     private bool isMoving = false;
 
+
+
     private bool doTeleport = true;
 
     private bool isTerminated;
@@ -28,6 +31,16 @@ public class TeleportBullet : MonoBehaviour
     public Vector3Int CurrentDirection => currentDirection;
     public bool IsMoving => isMoving;
     public bool Doteleport => doTeleport;
+
+
+    //coroutine stuff
+
+    // private bool doStopMoveCRImmediate = false;
+    // private bool doStopMoveCRAfterAnimation = false;
+    // private bool isMoveCRRunning = false;
+    // private bool isMoveAnimationCRRunning = false;
+    private Coroutine moveCoroutine;
+    private Action OnMoveAnimationEnd;
 
 
 
@@ -42,28 +55,72 @@ public class TeleportBullet : MonoBehaviour
 
         GridUtils.SnapToGrid(this.transform);
 
-        StartCoroutine(Move());
+        moveCoroutine = StartCoroutine(Move());
 
     }
+
+    public void SetPosition(Vector3Int targetGridPos)
+    {
+        Action SetNewPos = null;
+        SetNewPos = () =>
+        {
+            //好像不用管move协程是不是null，这里调用的时机是动画以及move已经结束了所以是安全的
+            currentGridPosition = targetGridPos;
+            transform.position = GridManager.Instance.GridToWorld(targetGridPos);
+            GridUtils.SnapToGrid(this.transform);
+            OnMoveAnimationEnd -= SetNewPos;
+        };
+
+        OnMoveAnimationEnd += SetNewPos;
+
+    }
+
+    // private IEnumerator SetPositionCoroutine(Vector3Int targetGridPos)
+    // {
+    //     Debug.Log($"当前帧: {Time.frameCount}");
+
+    //     if (isMoveCRRunning)
+    //     {
+    //         if (isMoveAnimationCRRunning)
+    //         {
+    //             doStopMoveCRAfterAnimation = true;
+    //         }
+    //         else
+    //         {
+    //             doStopMoveCRImmediate = true;
+    //         }
+    //         yield return new WaitUntil(() => !isMoveCRRunning);
+    //     }
+
+    //     currentGridPosition = targetGridPos;
+    //     transform.position = GridManager.Instance.GridToWorld(targetGridPos);
+    //     GridUtils.SnapToGrid(this.transform);
+
+    //     StartCoroutine(Move());
+    // }
     private IEnumerator Move()
     {
         while (isMoving)
         {
             Vector3Int nextGridPos = currentGridPosition + currentDirection;
-            
+
             // 检查碰撞
             CollisionResult collision = CheckCollision(nextGridPos);
-            
+
             if (collision.ShouldStop)
             {
                 // 终止子弹
                 TerminateBullet(nextGridPos);
-                yield break;
+                break;
             }
-            
+            Debug.Log($"当前帧: {Time.frameCount}");
+            Debug.Log(nextGridPos + "  " + transform.position);
+
             // 移动到下一格（无论是空格子还是可穿透的物体）
             yield return MoveAnimation(nextGridPos);
+
         }
+
     }
 
     private struct CollisionResult
@@ -120,6 +177,7 @@ public class TeleportBullet : MonoBehaviour
         Vector3 targetWorldPos = GridManager.Instance.GridToWorld(targetGridPos);
         while (Vector3.Distance(transform.position, targetWorldPos) > 0.01f)
         {
+            //Debug.Log(targetWorldPos+"  "+ transform.position);
             transform.position = Vector3.MoveTowards(
                 transform.position,
                 targetWorldPos,
@@ -130,6 +188,8 @@ public class TeleportBullet : MonoBehaviour
 
         GridUtils.SnapToGrid(this.transform);
         currentGridPosition = targetGridPos;
+        Debug.Log(moveCoroutine + " " + (moveCoroutine == null));
+        OnMoveAnimationEnd?.Invoke();
     }
 
     private void SetBulletDirection(Vector3Int direction)

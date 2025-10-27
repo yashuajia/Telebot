@@ -221,7 +221,7 @@ public class TeleportLaserSystem : MonoBehaviour
         isFiring = true;
         inputController.SetState(PlayerInputState.LaserFiring);
 
-        TeleportBullet bullet = Instantiate(bulletPrefab, GridManager.Instance.GridToWorld(currentPlayerGridPos + direction), quaternion.identity);
+        TeleportBullet bullet = Instantiate(bulletPrefab, GridManager.Instance.GridToWorld(currentPlayerGridPos), quaternion.identity);
         bullet.Initialize(currentPlayerGridPos, direction, OnBulletHit);
         RoomManager.Instance.SetTarget(bullet.transform);
 

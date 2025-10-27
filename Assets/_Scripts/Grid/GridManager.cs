@@ -151,6 +151,40 @@ public class GridManager : Singleton<GridManager>
 
     }
 
+    public GridObject[] FindAllObjectInRoom(Vector3Int gridPos)
+    {
+        if (RoomManager.Instance == null)
+        {
+            Debug.LogWarning("RoomManager 不存在");
+            return new GridObject[0];
+        }
+
+        // ✅ 获取房间的实际矩形边界
+        Zone checkZone = GetZoneAtGridPosition(gridPos);//each room only in one zone
+        Vector2Int roomPos = RoomManager.Instance.GetRoomCoordinates(gridPos);
+        Bounds roomBounds = RoomManager.Instance.GetRoomBounds(roomPos);
+
+        Vector3Int minGrid = WorldToGrid(roomBounds.min);
+        Vector3Int maxGrid = WorldToGrid(roomBounds.max);
+
+        List<GridObject> objectsInRoom = new List<GridObject>();
+
+        // ✅ 只遍历房间内的对象
+        foreach (var objPair in zoneGridObjects[checkZone])
+        {
+            Vector3Int objPos = objPair.Key;
+            
+            // 矩形边界检查（最快）
+            if (objPos.x >= minGrid.x && objPos.x <= maxGrid.x &&
+                objPos.y >= minGrid.y && objPos.y <= maxGrid.y)
+            {
+                objectsInRoom.Add(objPair.Value);
+            }
+        }
+
+        return objectsInRoom.ToArray();
+    }
+
     #endregion
 
     #region 占用检测
@@ -347,27 +381,27 @@ public class GridManager : Singleton<GridManager>
         return neighbors;
     }
 
-    /// <summary>
-    /// 获取指定范围内的所有网格坐标(曼哈顿距离)
-    /// </summary>
-    public List<Vector3Int> GetGridPositionsInRange(Vector3Int center, int range)
-    {
-        List<Vector3Int> positions = new List<Vector3Int>();
+    // /// <summary>
+    // /// 获取指定范围内的所有网格坐标(曼哈顿距离)
+    // /// </summary>
+    // public List<Vector3Int> GetGridPositionsInRange(Vector3Int center, int range)
+    // {
+    //     List<Vector3Int> positions = new List<Vector3Int>();
 
-        for (int x = -range; x <= range; x++)
-        {
-            for (int y = -range; y <= range; y++)
-            {
-                Vector3Int pos = center + new Vector3Int(x, y, 0);
-                if (GetManhattanDistance(center, pos) <= range)
-                {
-                    positions.Add(pos);
-                }
-            }
-        }
+    //     for (int x = -range; x <= range; x++)
+    //     {
+    //         for (int y = -range; y <= range; y++)
+    //         {
+    //             Vector3Int pos = center + new Vector3Int(x, y, 0);
+    //             if (GetManhattanDistance(center, pos) <= range)
+    //             {
+    //                 positions.Add(pos);
+    //             }
+    //         }
+    //     }
 
-        return positions;
-    }
+    //     return positions;
+    // }
 
     #endregion
 
