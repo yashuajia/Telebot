@@ -2,7 +2,14 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 using System;
-using Mono.Cecil.Cil;
+
+public class OutOfBoundsZone : Zone
+{
+    public override bool ContainsCell(Vector3Int cellPos) => true;
+    public override bool IsWall(Vector3Int gridPos) => true; // 所有位置都是墙
+    public override bool IsDamage(Vector3Int gridPos) => true;
+    public override TileBase GetWallTile(Vector3Int gridPos) => null;
+}
 
 /// <summary>
 /// 网格管理器 - 统一管理所有网格相关功能
@@ -21,6 +28,7 @@ public class GridManager : Singleton<GridManager>
     public Tilemap GlobalTilemap;
 
     private List<Zone> zones;
+    private Zone outOfBoundsZone; // 默认越界 Zone
     private Grid grid; // Unity的Grid组件
 
     // 为每个Zone维护独立的GridObject字典
@@ -51,6 +59,8 @@ public class GridManager : Singleton<GridManager>
         {
             zoneGridObjects[zone] = new Dictionary<Vector3Int, GridObject>();
         }
+
+        CreateOutOfBoundsZone();
     }
 
     void Start()
@@ -114,8 +124,31 @@ public class GridManager : Singleton<GridManager>
             if (zone.ContainsCell(gridPos))
                 return zone;
         }
-        Debug.LogError("get gridpos from no zone");
-        return null; // 回退
+        // Debug.LogError("get gridpos from no zone");
+        return outOfBoundsZone; // 回退
+    }
+    
+    private void CreateOutOfBoundsZone()
+    {
+        GameObject obj = new GameObject("OutOfBoundsZone");
+        obj.transform.SetParent(transform);
+        outOfBoundsZone = obj.AddComponent<OutOfBoundsZone>();
+        
+        if (!zoneGridObjects.ContainsKey(outOfBoundsZone))
+        {
+            zoneGridObjects[outOfBoundsZone] = new Dictionary<Vector3Int, GridObject>();
+        }
+    }
+
+    #endregion
+
+    #region Room管理
+
+    public bool IsPositionInCurrentRoom(Vector3Int gridPos)
+    {
+        // 将网格坐标转换为世界坐标
+        return RoomManager.Instance.IsInCurrentRoom(GridToWorld(gridPos));
+
     }
 
     #endregion
@@ -289,6 +322,8 @@ public class GridManager : Singleton<GridManager>
     {
         Zone targetZone = GetZoneAtGridPosition(gridPos);
         List<Vector3Int> neighbors = new List<Vector3Int>();
+        // List<Vector3Int> neighbors = ListPool<Vector3Int>.Get();
+        //listpool，先不管
 
         Vector3Int[] directions = includeDiagonals
             ? new Vector3Int[] {

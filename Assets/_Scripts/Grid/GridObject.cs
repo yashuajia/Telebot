@@ -73,6 +73,7 @@ public class GridObject : MonoBehaviour
 
 
     public Vector3Int GridPosition => currentGridPosition;
+    public Vector3Int InitGridPostion;//for resetting purpose?
     public bool IsRegistered => isRegistered;
 
     public event Action<Vector3Int> OnGridPosChange;
@@ -113,6 +114,7 @@ public class GridObject : MonoBehaviour
         {
             currentGridPosition = targetPos;
             lastKnownPosition = targetPos;
+            if (InitGridPostion == default) InitGridPostion = targetPos;
             isRegistered = true;
             SnapToGrid();
         }

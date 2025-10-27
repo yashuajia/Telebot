@@ -31,23 +31,23 @@ public class Zone : MonoBehaviour
         //areaMaskTilemap.GetComponent<TilemapRenderer>().enabled = false;
     }
 
-    public bool IsWall(Vector3Int gridPos)
+    public virtual bool IsWall(Vector3Int gridPos)
     {
         return wallTilemap.HasTile(gridPos);
     }
 
-    public bool IsDamage(Vector3Int gridPos)
+    public virtual bool IsDamage(Vector3Int gridPos)
     {
         return damagingTilemap.HasTile(gridPos);
     }
 
-    public bool ContainsCell(Vector3Int cell)
+    public virtual bool ContainsCell(Vector3Int cell)
     {
         if (areaMaskTilemap == null) return false;
         return areaMaskTilemap.HasTile(cell);
     }
 
-    public TileBase GetWallTile(Vector3Int gridpos)
+    public virtual TileBase GetWallTile(Vector3Int gridpos)
     {
         return wallTilemap.GetTile(gridpos);
     }

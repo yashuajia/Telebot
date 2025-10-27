@@ -3,7 +3,7 @@ using System;
 
 /// <summary>
 /// 房间管理器 - 集中管理房间切换和摄像机控制
-/// 应挂载在独立的GameObject上，如 "RoomManager" 或 "GameManager"
+/// 和gridmanager没关系
 /// </summary>
 public class RoomManager : Singleton<RoomManager>
 {
@@ -82,7 +82,7 @@ public class RoomManager : Singleton<RoomManager>
     {
         if (target == null || mainCamera == null) return;
         
-        // 计算玩家当前所在的房间坐标
+        // 计算玩家不一定玩家当前所在的房间坐标
         Vector2Int newRoomCoord = GetRoomCoordinates(target.position);
         
         // 检查是否需要切换房间
@@ -208,7 +208,7 @@ public class RoomManager : Singleton<RoomManager>
     /// <summary>
     /// 获取当前房间坐标
     /// </summary>
-    public Vector2Int GetCurrentRoomCoord()
+    public Vector2Int GetCurrentCameraRoomCoord()
     {
         return currentRoomCoord;
     }
