@@ -129,7 +129,7 @@ namespace DigitalWorlds.StarterPackage2D
 
             // Check if the player is on the ground during this FixedUpdate frame
             //isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
-            isGrounded = Physics2D.OverlapBox(groundCheck.position, new Vector2(0.9f, 0.1f), 0f, groundLayer);
+            isGrounded = Physics2D.OverlapBox(groundCheck.position, new Vector2(0.6f, 0.1f), 0f, groundLayer);
 
             if (isGrounded)
             {

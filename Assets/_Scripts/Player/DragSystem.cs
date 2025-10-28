@@ -8,7 +8,7 @@ public class DragSystem : MonoBehaviour
     public UnityEvent OnDragEnded;
 
     private PlayerInputController inputController;
-    private PlayerGridController playerGridController;
+    private PlayerGridObj playerGridObj;
     private ICanDrag currentDragging;
     private bool isDragging = false;
 
@@ -19,7 +19,7 @@ public class DragSystem : MonoBehaviour
     void Awake()
     {
         inputController = GetComponent<PlayerInputController>();
-        playerGridController = GetComponent<PlayerGridController>();
+        playerGridObj = GetComponent<PlayerGridObj>();
 
         // 注册输入事件
         if (inputController != null)
@@ -52,13 +52,13 @@ public class DragSystem : MonoBehaviour
             inputController.SetState(PlayerInputState.MouseDragging);
             OnDragStarted?.Invoke(currentDragging);
         }
-        else
-        {
-            if (playerGridController.IsRegistered)
-            {
-                playerGridController.UnsnapPlayerToGrid();
-            }
-        }
+        // else
+        // {
+        //     if (playerGridController.IsRegistered)
+        //     {
+        //         playerGridController.UnsnapPlayerToGrid();
+        //     }
+        // }
     }
 
     bool TryStartDrag(Vector2 mouseWorldPos)
@@ -71,25 +71,26 @@ public class DragSystem : MonoBehaviour
         ICanDrag draggable = hit.collider.GetComponent<ICanDrag>();
         if (draggable == null) return false;
 
-        // 尝试对齐玩家到网格
-        if (!playerGridController.TrySnapPlayerToGrid())
-        {
-            Debug.Log("Cannot start drag: snap to grid failed");
-            return false;
-        }
-
-        Vector3Int clickedGridPos = GridManager.Instance.WorldToGrid(mouseWorldPos);
-        if (!playerGridController.TryGetCurrentGridPos(out Vector3Int playerGridPos))
-        {
-            Debug.Log("cant get gridobj pos, which shouldnt happen");
-            return false;
-        }
+        // // 尝试对齐玩家到网格
+        // if (!playerGridController.TrySnapPlayerToGrid())
+        // {
+        //     Debug.Log("Cannot start drag: snap to grid failed");
+        //     return false;
+        // }
 
         // 检查是否点击的是玩家上方的物体（防止拖动玩家自己下面的东西）
-        if (clickedGridPos + Vector3Int.up == playerGridPos)
+        if (playerGridObj.TryGetGroundObjects(out GridObject[] groundObjects))
         {
-            Debug.Log("Cannot drag object directly below player");
-            return false;
+            GameObject clickedObject = hit.collider.gameObject;
+            
+            foreach (var groundObj in groundObjects)
+            {
+                if (groundObj.gameObject == clickedObject)
+                {
+                    Debug.Log($"Cannot drag object player is standing on: {clickedObject.name}");
+                    return false;
+                }
+            }
         }
 
 

@@ -34,11 +34,19 @@ public class GridManager : Singleton<GridManager>
     // 为每个Zone维护独立的GridObject字典
     private Dictionary<Zone, Dictionary<Vector3Int, GridObject>> zoneGridObjects;
 
+    private GameObject playerObj;
+
     public Action<Zone> OnZoneSwitched;
 
     protected override void Awake()
     {
         base.Awake();
+
+        playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj == null)
+        {
+            Debug.LogWarning("no player found by gridmanager");
+        }
 
         // 获取Grid组件
         if (GlobalTilemap != null)
@@ -195,7 +203,7 @@ public class GridManager : Singleton<GridManager>
 
     //把wall也当成一个gridobj
 
-    public bool IsOccupied(Vector3Int gridPos)
+    public bool IsOccupied(Vector3Int gridPos, bool ignorePlayer = false)
     {
         Zone checkZone = GetZoneAtGridPosition(gridPos);
 
@@ -206,6 +214,9 @@ public class GridManager : Singleton<GridManager>
         // 检查动态对象(GridObject字典)
         if (zoneGridObjects.ContainsKey(checkZone) &&
             zoneGridObjects[checkZone].ContainsKey(gridPos))
+            return true;
+
+        if (WorldToGrid(playerObj.transform.position) == gridPos && !ignorePlayer)
             return true;
 
         return false;
@@ -221,25 +232,34 @@ public class GridManager : Singleton<GridManager>
     /// <summary>
     /// 获取指定网格位置的GridObject
     /// </summary>
-    public bool TryGetGridObjectAt(Vector3Int gridPos, out GridObject gridObject, out bool isWall)
+    public bool TryGetGridObjectAt(Vector3Int gridPos,
+        out GridObject gridObject, out bool isWall, bool ignorePlayer = false)
     {
         Zone targetZone = GetZoneAtGridPosition(gridPos);
 
         isWall = targetZone.IsWall(gridPos);
         gridObject = null;
 
-        if (zoneGridObjects.TryGetValue(targetZone, out var map) &&
+        if (!ignorePlayer && WorldToGrid(playerObj.transform.position) == gridPos)
+        {
+            //player hide gridobj
+            gridObject = playerObj.GetComponent<PlayerGridObj>();
+        }
+        else if (zoneGridObjects.TryGetValue(targetZone, out var map) &&
             map.TryGetValue(gridPos, out var found))
         {
             gridObject = found;
             return true;
         }
+
+
         return false;
     }
 
-    public bool TryGetGridObjectAt(Vector3Int gridPos, out GridObject gridObject)
+    public bool TryGetGridObjectAt(Vector3Int gridPos, out GridObject gridObject,
+        bool ignorePlayer = false)
     {
-        return TryGetGridObjectAt(gridPos, out gridObject, out bool _);
+        return TryGetGridObjectAt(gridPos, out gridObject, out bool _, ignorePlayer);
     }
 
     public bool TryGetWallTileAt(Vector3Int gridPos, out TileBase tile)

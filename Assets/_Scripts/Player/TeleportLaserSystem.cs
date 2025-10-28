@@ -21,7 +21,7 @@ public class TeleportLaserSystem : MonoBehaviour
     public UnityEvent OnLaserComplete;
 
     private PlayerInputController inputController;
-    private PlayerGridController playerGridController;
+    private PlayerGridObj playerGridObj;
     private bool isFiring = false;
     private bool canShootLeft = false;
     private bool canShootRight = false;
@@ -33,7 +33,7 @@ public class TeleportLaserSystem : MonoBehaviour
     void Awake()
     {
         inputController = GetComponent<PlayerInputController>();
-        playerGridController = GetComponent<PlayerGridController>();
+        playerGridObj = GetComponent<PlayerGridObj>();
 
         // 注册输入事件
         if (inputController != null)
@@ -93,27 +93,29 @@ public class TeleportLaserSystem : MonoBehaviour
             inputController.SetState(PlayerInputState.LaserAiming);
             OnLaserModeEntered?.Invoke();
         }
-        else
-        {
-            if (playerGridController.IsRegistered)
-            {
-                playerGridController.UnsnapPlayerToGrid();
-            }
-        }
-        //这里要unsnap或者其他地方做
+        // else
+        // {
+        //     if (playerGridObj.IsRegistered)
+        //     {
+        //         playerGridObj.UnsnapPlayerToGrid();
+        //     }
+        // }
+        // //这里要unsnap或者其他地方做
+        
     }
 
     bool TryEnterLaserMode()
     {
-        // 尝试对齐到网格
-        if (!playerGridController.TrySnapPlayerToGrid())
-        {
-            Debug.Log("Cannot enter laser mode: snap to grid failed");
-            return false;
-        }
+        // // 尝试对齐到网格
+        // if (!playerGridObj.TrySnapPlayerToGrid())
+        // {
+        //     Debug.Log("Cannot enter laser mode: snap to grid failed");
+        //     //但是failed其实也不妨碍任何事
+        //     return false;
+        // }
 
         // 获取玩家当前网格位置
-        if (!playerGridController.TryGetCurrentGridPos(out currentPlayerGridPos))
+        if (!playerGridObj.TryGetCurrentGridPos(out currentPlayerGridPos))
         {
             Debug.Log("cant get gridobj pos, which shouldnt happen");
             return false;

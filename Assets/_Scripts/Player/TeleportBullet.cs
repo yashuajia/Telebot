@@ -113,8 +113,8 @@ public class TeleportBullet : MonoBehaviour
                 TerminateBullet(nextGridPos);
                 break;
             }
-            Debug.Log($"当前帧: {Time.frameCount}");
-            Debug.Log(nextGridPos + "  " + transform.position);
+            // Debug.Log($"当前帧: {Time.frameCount}");
+            // Debug.Log(nextGridPos + "  " + transform.position);
 
             // 移动到下一格（无论是空格子还是可穿透的物体）
             yield return MoveAnimation(nextGridPos);

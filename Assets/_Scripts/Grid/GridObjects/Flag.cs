@@ -26,7 +26,8 @@ public class Flag : GridObject
     protected override void Start()
     {
         base.Start();
-        RemoveFromGrid(); // 旗帜不占用网格
+        // RemoveFromGrid(); // 旗帜不占用网格
+        //还是占用一下吧
 
         // 确保Collider是Trigger
         Collider2D col = GetComponent<Collider2D>();
@@ -43,16 +44,14 @@ public class Flag : GridObject
         Deactivate();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        // 检查是否是玩家
+        if (this.isActive) return;
         if (!collision.CompareTag("Player"))
             return;
 
-        // 如果已经是激活状态，不需要重复激活
-        if (isActive)
+        if (GridManager.Instance.WorldToGrid(collision.transform.position) != this.GridPosition)
             return;
-
 
         PlayerRespawnController respawnController = collision.GetComponent<PlayerRespawnController>();
         if (respawnController == null)

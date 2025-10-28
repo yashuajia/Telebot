@@ -65,16 +65,16 @@ public class GridObject : MonoBehaviour
 
     // 当前网格位置（整数坐标）
     private Vector3Int currentGridPosition;
-    private Vector3Int lastKnownPosition;//关闭的时候记录，然后重启时使用
-    private bool isRegistered = false;  // 明确追踪注册状态
+    private Vector3Int lastKnownPosition;//关闭的时候记录，然后重启时使用，这个也不需要外部或者子类知道
+    private Vector3Int initGridPosition;
+    protected bool isRegistered = false;//deleting public IsRegistered
 
 
 
 
 
-    public Vector3Int GridPosition => currentGridPosition;
-    public Vector3Int InitGridPostion;//for resetting purpose?
-    public bool IsRegistered => isRegistered;
+    public virtual Vector3Int GridPosition => currentGridPosition;
+    public Vector3Int InitGridPostion => initGridPosition;//for resetting purpose?
 
     public event Action<Vector3Int> OnGridPosChange;
     public event Action<Vector3Int> OnNeighborChange;//这俩玩意得扔了？？
@@ -114,7 +114,7 @@ public class GridObject : MonoBehaviour
         {
             currentGridPosition = targetPos;
             lastKnownPosition = targetPos;
-            if (InitGridPostion == default) InitGridPostion = targetPos;
+            if (initGridPosition == default) initGridPosition = targetPos;
             isRegistered = true;
             SnapToGrid();
         }

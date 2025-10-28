@@ -13,14 +13,14 @@ public enum PlayerInputState
 }
 
 [RequireComponent(typeof(PlayerMovement2D))]
-[RequireComponent(typeof(PlayerGridController))]
+[RequireComponent(typeof(PlayerGridObj))]
 [RequireComponent(typeof(TeleportLaserSystem))]
 
 public class PlayerInputController : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerMovement2D playerMovement;
-    [SerializeField] private PlayerGridController playerGridControl;
+    [SerializeField] private PlayerGridObj playerGridObj;
     [SerializeField] private TeleportLaserSystem teleportLaserSystem;
 
     [Header("Settings")]
@@ -52,7 +52,7 @@ public class PlayerInputController : MonoBehaviour
     void Awake()
     {
         playerMovement = GetComponent<PlayerMovement2D>();
-        playerGridControl = GetComponent<PlayerGridController>();
+        playerGridObj = GetComponent<PlayerGridObj>();
         teleportLaserSystem = GetComponent<TeleportLaserSystem>();
     }
 
@@ -168,7 +168,6 @@ public class PlayerInputController : MonoBehaviour
     {
         playerMovement.Rb.bodyType = RigidbodyType2D.Dynamic;
         playerMovement.EnableMovement(true);
-        playerGridControl.UnsnapPlayerToGrid();
     }
     
     void DisablePlayerMovement()
