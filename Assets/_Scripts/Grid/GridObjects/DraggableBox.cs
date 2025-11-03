@@ -45,7 +45,7 @@ public class DraggableBox : GridObject, ICanDrag
         Vector3Int newGridPos = GridManager.Instance.WorldToGrid(mouseWorldPos);
         if (newGridPos != targetGridPosition &&
             !GridManager.Instance.IsOccupied(newGridPos)
-            && SimpleRoadFinding(this.GridPosition, newGridPos))
+            && GridManager.Instance.IsReachable(this.GridPosition, newGridPos))
         {
             targetGridPosition = newGridPos;
         }
@@ -85,29 +85,7 @@ public class DraggableBox : GridObject, ICanDrag
         SnapToGrid();
     }
 
-    bool SimpleRoadFinding(Vector3Int from, Vector3Int to)
-    {
-        Queue<Vector3Int> frontier = new();
-        HashSet<Vector3Int> visited = new();
-        frontier.Enqueue(from);
-        visited.Add(from);
 
-        while (frontier.Count > 0)
-        {
-            var current = frontier.Dequeue();
-            if (current == to) return true;
-
-            foreach (Vector3Int walkableNeighbor in GridManager.Instance.GetWalkableNeighbors(current))
-            {
-                //不能出room
-                if (!GridManager.Instance.IsPositionInCurrentRoom(walkableNeighbor)) continue;
-                if (visited.Contains(walkableNeighbor)) continue;
-                visited.Add(walkableNeighbor);
-                frontier.Enqueue(walkableNeighbor);
-            }
-        }
-        return false;
-    }
     
     #endregion
 }

@@ -302,12 +302,12 @@ public class GridManager : Singleton<GridManager>
         // 检查位置是否已被占用
         if (zoneGridObjects[targetZone].ContainsKey(gridPos))
         {
-            Debug.LogWarning($"网格位置 {gridPos} 已被 {zoneGridObjects[targetZone][gridPos].name} 占用!");
+            //Debug.LogWarning($"网格位置 {gridPos} 已被 {zoneGridObjects[targetZone][gridPos].name} 占用!");
             return false;
         }
 
         zoneGridObjects[targetZone][gridPos] = gridObject;
-        Debug.Log($"注册GridObject: {gridObject.name} at {gridPos} in {targetZone.name}");
+        //Debug.Log($"注册GridObject: {gridObject.name} at {gridPos} in {targetZone.name}");
         return true;
     }
 
@@ -321,9 +321,10 @@ public class GridManager : Singleton<GridManager>
         if (targetZone == null || !zoneGridObjects.ContainsKey(targetZone))
             return;
 
+        //this has a little problem, what if it didnt remove the thing?
         if (zoneGridObjects[targetZone].Remove(gridPos))
         {
-            Debug.Log($"取消注册GridObject: {gridObject.name} from {gridPos}");
+            //Debug.Log($"取消注册GridObject: {gridObject.name} from {gridPos}");
         }
     }
 
@@ -339,7 +340,7 @@ public class GridManager : Singleton<GridManager>
         // 检查新位置是否被其他对象占用
         if (dict.ContainsKey(newPos) && dict[newPos] != gridObject)
         {
-            Debug.LogWarning($"目标位置 {newPos} 已被其他对象占用!");
+            //Debug.LogWarning($"目标位置 {newPos} 已被其他对象占用!");
             return false;
         }
 
@@ -422,6 +423,34 @@ public class GridManager : Singleton<GridManager>
 
     //     return positions;
     // }
+
+    #endregion
+
+    #region 寻路
+
+    public bool IsReachable(Vector3Int from, Vector3Int to)
+    {
+        Queue<Vector3Int> frontier = new();
+        HashSet<Vector3Int> visited = new();
+        frontier.Enqueue(from);
+        visited.Add(from);
+
+        while (frontier.Count > 0)
+        {
+            var current = frontier.Dequeue();
+            if (current == to) return true;
+
+            foreach (Vector3Int walkableNeighbor in GetWalkableNeighbors(current))
+            {
+                //不能出room
+                if (!IsPositionInCurrentRoom(walkableNeighbor)) continue;
+                if (visited.Contains(walkableNeighbor)) continue;
+                visited.Add(walkableNeighbor);
+                frontier.Enqueue(walkableNeighbor);
+            }
+        }
+        return false;
+    }
 
     #endregion
 

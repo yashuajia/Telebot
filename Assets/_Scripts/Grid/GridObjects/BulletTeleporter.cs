@@ -5,7 +5,7 @@ public class BulletTeleporter : GridObject, IBulletInteract
     [SerializeField] private BulletTeleporter pairedTeleporter;
     
     private float lastTeleportTime = -1f;
-    private const float TELEPORT_COOLDOWN = 1f; // 防止死循环
+    private const float TELEPORT_COOLDOWN = 0.3f; // 防止死循环
     
     public void OnHit(OnHitInfo onHitInfo)
     {

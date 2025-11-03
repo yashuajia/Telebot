@@ -18,7 +18,7 @@ public class Flag : GridObject
     private SpriteRenderer spriteRenderer;
     private AudioSource audioSource;
 
-    private PlayerRespawnController playerRespawnController;
+    private PlayerRespawnController respawnController;
     private bool isActive = false;
 
     public bool IsActive => isActive;
@@ -30,11 +30,7 @@ public class Flag : GridObject
         //还是占用一下吧
 
         // 确保Collider是Trigger
-        Collider2D col = GetComponent<Collider2D>();
-        if (col != null)
-        {
-            col.isTrigger = true;
-        }
+        //把col改小一点
 
         // 获取组件
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -44,16 +40,18 @@ public class Flag : GridObject
         Deactivate();
     }
 
-    private void OnTriggerStay2D(Collider2D collision)
+    private void OnTriggerEnter2D(Collider2D collision)
     {
+
         if (this.isActive) return;
+
         if (!collision.CompareTag("Player"))
             return;
-
         if (GridManager.Instance.WorldToGrid(collision.transform.position) != this.GridPosition)
             return;
 
-        PlayerRespawnController respawnController = collision.GetComponent<PlayerRespawnController>();
+        respawnController = collision.GetComponentInParent<PlayerRespawnController>();
+        //其实这个可能是之前注册残留下来的不同的respawncontroller但是现在没必要修这个，大概
         if (respawnController == null)
         {
             Debug.LogWarning("玩家身上没有 PlayerHealth2D 组件！");
@@ -81,7 +79,7 @@ public class Flag : GridObject
             audioSource.PlayOneShot(activateSound);
         }
 
-        this.playerRespawnController = playerRespawnController;
+        this.respawnController = playerRespawnController;
         playerRespawnController.onPlayerRespawn += RespawnPlayer;
     }
 
@@ -91,10 +89,10 @@ public class Flag : GridObject
         spriteRenderer.sprite = inactiveSprite;
 
         // 取消事件订阅
-        if (playerRespawnController != null)
+        if (respawnController != null)
         {
-            playerRespawnController.onPlayerRespawn -= RespawnPlayer;
-            playerRespawnController = null;
+            respawnController.onPlayerRespawn -= RespawnPlayer;
+            respawnController = null;
         }
     }
     

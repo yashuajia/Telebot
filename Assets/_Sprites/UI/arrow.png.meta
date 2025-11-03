@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: f4a12f3af3ba74b47abedae7a4119f41
+guid: 6de78534697f91d4c9856ab0b7ce11b7
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6441666609777891983
-    second: left arrow_0
+      213: -765150924802650856
+    second: arrow_0
+  - first:
+      213: -7451953295746623981
+    second: arrow_1
+  - first:
+      213: 4793074969510804509
+    second: arrow_2
+  - first:
+      213: 4397636249099975194
+    second: arrow_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +55,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 0
   alignment: 0
@@ -100,7 +109,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: robot_idle_0
+      name: arrow_0
       rect:
         serializedVersion: 2
         x: 0
@@ -113,16 +122,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f38ea2782b97b25e0800000000000000
-      internalID: -1933317807346620353
+      spriteID: 729cc999fa0b6aa4bb074e5570c68b23
+      internalID: 1664879092
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: robot_idle_1
+      name: arrow_1
       rect:
         serializedVersion: 2
         x: 32
@@ -135,16 +144,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: a9fd25da9603b4750800000000000000
-      internalID: 6290174534990618522
+      spriteID: 85ba7fe2b59f84c46976bef6b804cdaf
+      internalID: 255316886
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: robot_idle_2
+      name: arrow_2
       rect:
         serializedVersion: 2
         x: 64
@@ -157,16 +166,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: dc85b67820c2399f0800000000000000
-      internalID: -462977947315513139
+      spriteID: 0f10ed1145b12ce48a5d8a22f339218b
+      internalID: 1819830451
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: robot_idle_3
+      name: arrow_3
       rect:
         serializedVersion: 2
         x: 96
@@ -179,10 +188,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 88cc97ab730980890800000000000000
-      internalID: -7491579411104674680
+      spriteID: be8e67945cfeeda42b7e4b7b0129a9a1
+      internalID: -1919453248
       vertices: []
       indices: 
       edges: []
@@ -203,10 +212,10 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":32.0,"y":32.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      robot_idle_0: -1933317807346620353
-      robot_idle_1: 6290174534990618522
-      robot_idle_2: -462977947315513139
-      robot_idle_3: -7491579411104674680
+      arrow_0: 1664879092
+      arrow_1: 255316886
+      arrow_2: 1819830451
+      arrow_3: -1919453248
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

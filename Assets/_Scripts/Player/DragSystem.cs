@@ -21,7 +21,6 @@ public class DragSystem : MonoBehaviour
         inputController = GetComponent<PlayerInputController>();
         playerGridObj = GetComponent<PlayerGridObj>();
 
-        // 注册输入事件
         if (inputController != null)
         {
             inputController.OnMouseDown.AddListener(HandleMouseDown);
@@ -32,7 +31,7 @@ public class DragSystem : MonoBehaviour
 
     void OnDestroy()
     {
-        // 清理事件注册
+        //清理事件注册
         if (inputController != null)
         {
             inputController.OnMouseDown.RemoveListener(HandleMouseDown);
@@ -41,24 +40,35 @@ public class DragSystem : MonoBehaviour
         }
     }
 
+    //enable the drag
+    //这里其实限制了只能有一个inputcontroller，不过管他呢
+    public void EnterDragMode()
+    {
+        //inputcontroller在awake的时候已经拿到了所以不用再拿了
+        if (inputController.CurrentState == PlayerInputState.Normal)
+        {
+            inputController.SetState(PlayerInputState.DragMode);
+        }
+    }
+
+    public void ExitDragMode()
+    {
+        if (inputController.CurrentState == PlayerInputState.DragMode)
+        {
+            inputController.SetState(PlayerInputState.Normal);
+        }
+    }
+
 
     void HandleMouseDown(Vector2 mouseWorldPos)
     {
-        // 只在Normal状态下才能开始拖拽
-        if (inputController.CurrentState != PlayerInputState.Normal) return;
+
 
         if (TryStartDrag(mouseWorldPos))
         {
-            inputController.SetState(PlayerInputState.MouseDragging);
             OnDragStarted?.Invoke(currentDragging);
         }
-        // else
-        // {
-        //     if (playerGridController.IsRegistered)
-        //     {
-        //         playerGridController.UnsnapPlayerToGrid();
-        //     }
-        // }
+
     }
 
     bool TryStartDrag(Vector2 mouseWorldPos)
@@ -70,13 +80,6 @@ public class DragSystem : MonoBehaviour
 
         ICanDrag draggable = hit.collider.GetComponent<ICanDrag>();
         if (draggable == null) return false;
-
-        // // 尝试对齐玩家到网格
-        // if (!playerGridController.TrySnapPlayerToGrid())
-        // {
-        //     Debug.Log("Cannot start drag: snap to grid failed");
-        //     return false;
-        // }
 
         // 检查是否点击的是玩家上方的物体（防止拖动玩家自己下面的东西）
         if (playerGridObj.TryGetGroundObjects(out GridObject[] groundObjects))
@@ -131,8 +134,6 @@ public class DragSystem : MonoBehaviour
         
         isDragging = false;
         currentDragging = null;
-        
-        inputController.SetState(PlayerInputState.Normal);
         
         OnDragEnded?.Invoke();
     }

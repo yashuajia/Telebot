@@ -1,15 +1,17 @@
 using UnityEngine;
 using UnityEngine.Events;
 using DigitalWorlds.StarterPackage2D;
+using UnityEngine.InputSystem;
 
 
 
 public enum PlayerInputState
 {
     Normal,           // 可以移动、进入Laser模式、使用鼠标
-    LaserAiming,      // 只能按Horizontal或Space
-    LaserFiring,      // 所有输入禁用
-    MouseDragging     // 只能鼠标拖动
+    LaserMode,      // 只能按Horizontal或Space
+    // LaserFiring,      // 所有输入禁用
+    //这个已经不需要了
+    DragMode     // 只能鼠标拖动
 }
 
 [RequireComponent(typeof(PlayerMovement2D))]
@@ -24,7 +26,8 @@ public class PlayerInputController : MonoBehaviour
     [SerializeField] private TeleportLaserSystem teleportLaserSystem;
 
     [Header("Settings")]
-    [SerializeField] private KeyCode laserKey = KeyCode.Space;
+    [SerializeField] private KeyCode laserKey = KeyCode.F;
+    [SerializeField] private KeyCode interactKey = KeyCode.W;
 
     [Header("Events")]
     //laser events
@@ -36,7 +39,11 @@ public class PlayerInputController : MonoBehaviour
     public UnityEvent<Vector2> OnMouseDrag;
     public UnityEvent OnMouseUp;
 
+    public UnityEvent<Vector3Int> OnInteractKeyPressed;
+
     private PlayerInputState currentState = PlayerInputState.Normal;
+
+    private bool canInteract = true;
 
     // 供外部查询
     public PlayerInputState CurrentState => currentState;
@@ -58,22 +65,33 @@ public class PlayerInputController : MonoBehaviour
 
     void Update()
     {
+        //feels weird but it works i guess
+        HandleInteract();
+
         switch (currentState)
         {
             case PlayerInputState.Normal:
                 HandleNormalState();
                 break;
 
-            case PlayerInputState.LaserAiming:
-                HandleLaserAimingState();
+            case PlayerInputState.LaserMode:
+                HandleLaserMode();
                 break;
 
-            case PlayerInputState.LaserFiring:
+            case PlayerInputState.DragMode:
+                HandleDragMode();
                 break;
+        }
+    }
 
-            case PlayerInputState.MouseDragging:
-                HandleMouseDraggingState();
-                break;
+    void HandleInteract()
+    {
+        //should be using interact manager to control
+        //actually not really related to state machine 
+        if (Input.GetKeyDown(interactKey) && IsGroundedAndStopped && canInteract)
+        {
+            playerGridObj.TryGetCurrentGridPos(out Vector3Int playerGridpos);
+            OnInteractKeyPressed?.Invoke(playerGridpos);
         }
     }
 
@@ -81,23 +99,20 @@ public class PlayerInputController : MonoBehaviour
     void HandleNormalState()
     {
         // 正常移动输入已由PlayerMovement2D处理
-        
+
         // 激光模式按键
         if (Input.GetKeyDown(laserKey) && IsGroundedAndStopped)
         {
             OnLaserKeyPressed?.Invoke();
         }
-        
-        // 鼠标按下
-        if (Input.GetMouseButtonDown(0) && IsGroundedAndStopped)
-        {
-            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            OnMouseDown?.Invoke(mouseWorldPos);
-        }
+
+
+
+
     }
     
     // ============= Laser Aiming State =============
-    void HandleLaserAimingState()
+    void HandleLaserMode()
     {
         if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
         {
@@ -114,19 +129,28 @@ public class PlayerInputController : MonoBehaviour
             OnLaserExitPressed?.Invoke();
         }
     }
-    
-    void HandleMouseDraggingState()
+
+    void HandleDragMode()
     {
+
+        // 鼠标按下
+        if (Input.GetMouseButtonDown(0) && IsGroundedAndStopped)
+        {
+            Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            OnMouseDown?.Invoke(mouseWorldPos);
+        }
+
         if (Input.GetMouseButton(0))
         {
             Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             OnMouseDrag?.Invoke(mouseWorldPos);
         }
-        
+
         if (Input.GetMouseButtonUp(0))
         {
             OnMouseUp?.Invoke();
         }
+        
     }
 
 
@@ -150,11 +174,14 @@ public class PlayerInputController : MonoBehaviour
         {
             case PlayerInputState.Normal:
                 EnablePlayerMovement();
+                canInteract = true;
                 break;
-            case PlayerInputState.LaserAiming:
-            case PlayerInputState.LaserFiring:
-            case PlayerInputState.MouseDragging:
+            case PlayerInputState.LaserMode:
+                canInteract = false;
+                break;
+            case PlayerInputState.DragMode:
                 DisablePlayerMovement();
+                canInteract = true;//to exit
                 break;
         }
     }
