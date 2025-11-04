@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Tilemaps;
 
 
@@ -25,6 +24,7 @@ public class TeleportBullet : MonoBehaviour
 
     private bool isTerminated;
 
+    private BulletModifier modifier;
 
 
     public float CurrentSpeed => moveSpeed;
@@ -32,23 +32,21 @@ public class TeleportBullet : MonoBehaviour
     public bool IsMoving => isMoving;
     public bool Doteleport => doTeleport;
 
+    public BulletModifier Modifier => modifier;
 
-    //coroutine stuff
-
-    // private bool doStopMoveCRImmediate = false;
-    // private bool doStopMoveCRAfterAnimation = false;
-    // private bool isMoveCRRunning = false;
-    // private bool isMoveAnimationCRRunning = false;
     private Coroutine moveCoroutine;
     private Action OnMoveAnimationEnd;
 
 
 
-    public void Initialize(Vector3Int startGridPos, Vector3Int startDirection, Action<OnHitInfo> onBulletDestroy)
+    public void Initialize(Vector3Int startGridPos,
+        Vector3Int startDirection, Action<OnHitInfo> onBulletDestroy,
+        BulletModifier modifier = BulletModifier.Normal)
     {
         isMoving = true;
         onBulletDestroyCallback = onBulletDestroy;
         currentGridPosition = startGridPos;
+        this.modifier = modifier;
 
         this.transform.position = GridManager.Instance.GridToWorld(startGridPos + startDirection);
         SetBulletDirection(startDirection);
@@ -139,7 +137,7 @@ public class TeleportBullet : MonoBehaviour
 
         // 获取击中的对象
         GridManager.Instance.TryGetGridObjectAt(gridPos, out GridObject hitObject, out bool isWall);
-        
+
         IBulletInteract hittable;
         if (isWall)
         {
@@ -161,14 +159,14 @@ public class TeleportBullet : MonoBehaviour
         // 调用击中逻辑
         OnHitInfo onHitInfo = new OnHitInfo(gridPos, currentDirection, this);
         hittable.OnHit(onHitInfo);
-        
+
         // 检查是否阻挡
         bool isBlocked = hittable.IsBlockBullet(onHitInfo);
-        
-        return new CollisionResult 
-        { 
-            ShouldStop = isBlocked, 
-            HitObject = hittable 
+
+        return new CollisionResult
+        {
+            ShouldStop = isBlocked,
+            HitObject = hittable
         };
     }
 
@@ -223,32 +221,32 @@ public class TeleportBullet : MonoBehaviour
     {
         if (isTerminated) return;
         isTerminated = true;
-        
+
         isMoving = false;
-        
+
         Debug.Log($"bullet terminate at {stopGridPos}");
-        
+
         // 停止粒子
         if (bulletParticle != null && bulletParticle.isPlaying)
         {
             bulletParticle.transform.SetParent(null);
             bulletParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
         }
-        
+
         // 先停止协程
         StopAllCoroutines();
-        
+
         // 保存回调并立即清空
         var callback = onBulletDestroyCallback;
         onBulletDestroyCallback = null;
-        
+
         // 调用回调
         if (callback != null)
         {
             OnHitInfo onHitInfo = new OnHitInfo(stopGridPos, currentDirection, this);
             callback.Invoke(onHitInfo);
         }
-        
+
         // 销毁对象
         Destroy(gameObject);
     }
@@ -257,13 +255,13 @@ public class TeleportBullet : MonoBehaviour
     {
         // 确保清理
         isMoving = false;
-        
+
         if (bulletParticle != null && bulletParticle.isPlaying)
         {
             bulletParticle.transform.SetParent(null);
             bulletParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
-        
+
         StopAllCoroutines();
         onBulletDestroyCallback = null;
     }

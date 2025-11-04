@@ -429,8 +429,8 @@ public class GridObject : MonoBehaviour
     {
         if (!showGridGizmos || GridManager.Instance == null) return;
 
-        Vector3 gridWorldPos = GridManager.Instance.GridToWorld(currentGridPosition);
-
+        Vector3 gridWorldPos = GridManager.Instance.GridToWorld(
+                GridManager.Instance.WorldToGrid(this.transform.position));
         // 边框颜色：已注册=绿色，未注册=灰色
         Gizmos.color = isRegistered ? Color.green : Color.gray;
         Gizmos.DrawWireCube(gridWorldPos, new Vector3(1f, 1f, 0.1f));

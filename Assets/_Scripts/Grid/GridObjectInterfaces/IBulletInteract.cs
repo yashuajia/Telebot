@@ -5,7 +5,12 @@ public struct OnHitInfo
     public Vector3Int HitDirection;
     public TeleportBullet Bullet;
 
-    public OnHitInfo(Vector3Int gridPos, Vector3Int hitDirection, TeleportBullet bullet)
+
+    //public GameObject PlayerGO;
+    //no this is wont work
+
+    public OnHitInfo(Vector3Int gridPos, Vector3Int hitDirection,
+        TeleportBullet bullet)
     {
         GridPos = gridPos;
         HitDirection = hitDirection;

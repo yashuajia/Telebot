@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using DigitalWorlds.StarterPackage2D;
-using UnityEngine.InputSystem;
+using System.Collections;
 
 
 
@@ -11,7 +11,8 @@ public enum PlayerInputState
     LaserMode,      // 只能按Horizontal或Space
     // LaserFiring,      // 所有输入禁用
     //这个已经不需要了
-    DragMode     // 只能鼠标拖动
+    DragMode,     // 只能鼠标拖动
+    Buffer, //no moving or any input
 }
 
 [RequireComponent(typeof(PlayerMovement2D))]
@@ -44,6 +45,8 @@ public class PlayerInputController : MonoBehaviour
     private PlayerInputState currentState = PlayerInputState.Normal;
 
     private bool canInteract = true;
+
+    private bool lockStateChange = false;
 
     // 供外部查询
     public PlayerInputState CurrentState => currentState;
@@ -106,9 +109,6 @@ public class PlayerInputController : MonoBehaviour
             OnLaserKeyPressed?.Invoke();
         }
 
-
-
-
     }
     
     // ============= Laser Aiming State =============
@@ -155,9 +155,13 @@ public class PlayerInputController : MonoBehaviour
 
 
     // ============= State Management (供其他系统调用) =============
-    public void SetState(PlayerInputState newState)
+
+    //need to check for success in setstate calls, but no problem right now
+    public bool SetState(PlayerInputState newState)
     {
-        if (currentState == newState) return;
+        if (lockStateChange) return false;
+
+        if (currentState == newState) return true;
 
         // 退出旧状态
         OnExitState(currentState);
@@ -166,6 +170,24 @@ public class PlayerInputController : MonoBehaviour
 
         // 进入新状态
         OnEnterState(newState);
+        return true;
+    }
+
+    public void TransitionWithDelay(PlayerInputState targetState, float delay = 0.2f)
+    {
+        StartCoroutine(DelayedTransition(targetState, delay));
+    }
+
+    private IEnumerator DelayedTransition(PlayerInputState targetState, float delay)
+    {
+        lockStateChange = true;
+        DisablePlayerMovement(); // 延迟期间禁用移动
+        canInteract = false;
+        
+        yield return new WaitForSeconds(delay);
+        
+        lockStateChange = false;
+        SetState(targetState);
     }
     
     void OnEnterState(PlayerInputState state)
@@ -183,6 +205,10 @@ public class PlayerInputController : MonoBehaviour
                 DisablePlayerMovement();
                 canInteract = true;//to exit
                 break;
+            case PlayerInputState.Buffer:
+                DisablePlayerMovement();
+                canInteract = false;
+                break; 
         }
     }
     

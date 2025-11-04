@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7306385465039164714
+--- !u!1 &4738503656845388707
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,39 +8,54 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6264965981859456739}
-  - component: {fileID: 5223818669776462471}
-  - component: {fileID: 7797083813703317937}
-  - component: {fileID: 3748146135320809655}
+  - component: {fileID: 4656864354779487673}
+  - component: {fileID: 8396837482965391283}
+  - component: {fileID: 1457424609082108510}
+  - component: {fileID: 537787159076093440}
+  - component: {fileID: 4567515603887037461}
   m_Layer: 0
-  m_Name: Flag
+  m_Name: GlassWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6264965981859456739
+--- !u!4 &4656864354779487673
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7306385465039164714}
+  m_GameObject: {fileID: 4738503656845388707}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 11.5, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &5223818669776462471
+--- !u!114 &8396837482965391283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4738503656845388707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce0b9af11dc644b48bce266eb743ca20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GlassWall
+  showGridGizmos: 1
+  gridObjDirection: 0
+--- !u!61 &1457424609082108510
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7306385465039164714}
+  m_GameObject: {fileID: 4738503656845388707}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -64,7 +79,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -78,33 +93,15 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.2, y: 0.2}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &7797083813703317937
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7306385465039164714}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2e1a863c90c4d4e4e9502609ab84cf13, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Flag
-  showGridGizmos: 1
-  gridObjDirection: 0
-  inactiveSprite: {fileID: 1302374387, guid: e8368a8c2f5fb594ba34410266ce25dc, type: 3}
-  activeSprite: {fileID: -888064184, guid: e8368a8c2f5fb594ba34410266ce25dc, type: 3}
-  activateSound: {fileID: 0}
-  deactivateSound: {fileID: 0}
---- !u!212 &3748146135320809655
+--- !u!212 &537787159076093440
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7306385465039164714}
+  m_GameObject: {fileID: 4738503656845388707}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -123,7 +120,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 66a0db1456b704b41bff14894b4af37a, type: 2}
+  - {fileID: 2100000, guid: ecab3c5089a4b714b81fbde92746d015, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -145,7 +142,7 @@ SpriteRenderer:
   m_SortingLayerID: 2131660789
   m_SortingLayer: 3
   m_SortingOrder: 0
-  m_Sprite: {fileID: 1302374387, guid: e8368a8c2f5fb594ba34410266ce25dc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9444ed82e9cb8b649a8c150236380ac3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -156,3 +153,16 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4567515603887037461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4738503656845388707}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 576cfdd2c5b9b6149bcd929629683043, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ThemeController
+  useGlobalTheme: 1

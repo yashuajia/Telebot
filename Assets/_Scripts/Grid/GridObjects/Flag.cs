@@ -68,7 +68,7 @@ public class Flag : GridObject
         player.position = this.transform.position;
     }
 
-    public void Activate(PlayerRespawnController playerRespawnController)
+    public void Activate()
     {
         isActive = true;
         spriteRenderer.sprite = activeSprite;
@@ -79,8 +79,7 @@ public class Flag : GridObject
             audioSource.PlayOneShot(activateSound);
         }
 
-        this.respawnController = playerRespawnController;
-        playerRespawnController.onPlayerRespawn += RespawnPlayer;
+        GameEvents.OnPlayerRespawn += RespawnPlayer;
     }
 
     public void Deactivate()
@@ -88,12 +87,7 @@ public class Flag : GridObject
         isActive = false;
         spriteRenderer.sprite = inactiveSprite;
 
-        // 取消事件订阅
-        if (respawnController != null)
-        {
-            respawnController.onPlayerRespawn -= RespawnPlayer;
-            respawnController = null;
-        }
+        GameEvents.OnPlayerRespawn -= RespawnPlayer;
     }
     
     

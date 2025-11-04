@@ -1,20 +1,14 @@
 using System;
 using UnityEngine;
 
-public enum WallGroupState
-{
-    Intact,
-    PartialBroken,
-    AllBroken,
-}
-public class FakeWallGroup : MonoBehaviour
+//actually duplicated code, but whatever
+public class LockWallGroup : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    private FakeWall[] walls;
+    private LockWall[] walls;
     void Start()
     {
-        walls = GetComponentsInChildren<FakeWall>();
-        RoomManager.OnRoomChanged += OnRoomChanged;
+        walls = GetComponentsInChildren<LockWall>();
     }
 
     private WallGroupState wallGroupState = WallGroupState.Intact;
@@ -35,17 +29,21 @@ public class FakeWallGroup : MonoBehaviour
     {
         wallGroupState = WallGroupState.Intact;
         triggerRecover?.Invoke();
-        foreach (var fakewall in walls)
+        foreach (var lockWall in walls)
         {
-            if (fakewall.IsBroken) wallGroupState = WallGroupState.PartialBroken;
+            if (lockWall.IsBroken) wallGroupState = WallGroupState.PartialBroken;
             //如果全都broken了那其实应该是allbroken，但是现在没必要管
         }
     }
 
-    public void OnRoomChanged(Vector2Int oldRoomPos, Vector2Int newRoomPos)
-    {
-        if (wallGroupState == WallGroupState.Intact) return;
-        TriggerRecoverAll();
-    }
+    //recover when player dead
+
+
+
+    // public void OnRoomChanged(Vector2Int oldRoomPos, Vector2Int newRoomPos)
+    // {
+    //     if (wallGroupState == WallGroupState.Intact) return;
+    //     TriggerRecoverAll();
+    // }
 
 }

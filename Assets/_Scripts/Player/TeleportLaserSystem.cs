@@ -23,6 +23,7 @@ public class TeleportLaserSystem : MonoBehaviour
 
     private PlayerInputController inputController;
     private PlayerGridObj playerGridObj;
+    private InventorySystem inventorySystem;
 
     //改成了bullet count
     //private bool isFiring = false;
@@ -39,6 +40,7 @@ public class TeleportLaserSystem : MonoBehaviour
     {
         inputController = GetComponent<PlayerInputController>();
         playerGridObj = GetComponent<PlayerGridObj>();
+        inventorySystem = GetComponent<InventorySystem>();
 
         // 注册输入事件
         if (inputController != null)
@@ -211,11 +213,11 @@ public class TeleportLaserSystem : MonoBehaviour
 
         if (wantsToShootLeft && canShootLeft)
         {
-            StartCoroutine(LaunchBullet(Vector3Int.left));
+            LaunchBullet(Vector3Int.left);
         }
         else if (wantsToShootRight && canShootRight)
         {
-            StartCoroutine(LaunchBullet(Vector3Int.right));
+            LaunchBullet(Vector3Int.right);
         }
         else
         {
@@ -226,7 +228,7 @@ public class TeleportLaserSystem : MonoBehaviour
     }
 
 
-    private IEnumerator LaunchBullet(Vector3Int direction)
+    private void LaunchBullet(Vector3Int direction)
     {
         HideArrows();
 
@@ -235,15 +237,24 @@ public class TeleportLaserSystem : MonoBehaviour
         //inputController.SetState(PlayerInputState.LaserFiring);
 
 
-        TeleportBullet bullet = Instantiate(bulletPrefab, GridManager.Instance.GridToWorld(currentPlayerGridPos), quaternion.identity);
-        bullet.Initialize(currentPlayerGridPos, direction, OnBulletHit);
+        TeleportBullet bullet = Instantiate(bulletPrefab,
+            GridManager.Instance.GridToWorld(currentPlayerGridPos), quaternion.identity);
+
+        BulletModifierObj modifierObj = inventorySystem.PopLastItem();
+        if (modifierObj != null)
+        {
+            bullet.Initialize(currentPlayerGridPos, direction, OnBulletHit, modifierObj.BulletModifier);
+        }
+        else
+        {
+            bullet.Initialize(currentPlayerGridPos, direction, OnBulletHit);
+        }
+
         //不要换目标了
         //RoomManager.Instance.SetTarget(bullet.transform);
 
         OnLaserFired?.Invoke();
-
-        yield return new WaitForSeconds(0.2f);
-        inputController.SetState(PlayerInputState.Normal);
+        inputController.TransitionWithDelay(PlayerInputState.Normal, 0.2f);
     }
 
     void OnBulletHit(OnHitInfo bulletHitInfo)
@@ -258,9 +269,6 @@ public class TeleportLaserSystem : MonoBehaviour
             Vector3Int teleportPos = bulletHitInfo.GridPos - bulletHitInfo.HitDirection;
             transform.position = GridManager.Instance.GridToWorld(teleportPos);
         }
-        
-        // 摄像机跟踪回玩家
-        RoomManager.Instance.SetTarget(this.transform);
         
         // 退出激光模式
         ExitLaserMode();

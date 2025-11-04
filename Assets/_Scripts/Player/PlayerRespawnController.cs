@@ -20,8 +20,6 @@ public class PlayerRespawnController : MonoBehaviour
     [Tooltip("可选：死亡音效")]
     [SerializeField] private AudioClip deathSound;
 
-    public event Action onPlayerDeath;
-    public event Action<Transform> onPlayerRespawn;
 
 
 
@@ -63,7 +61,7 @@ public class PlayerRespawnController : MonoBehaviour
         }
 
         // 触发死亡事件
-        onPlayerDeath?.Invoke();
+        GameEvents.OnPlayerDeath?.Invoke();
 
         // 延迟重生
         if (delayBeforeRespawn > 0)
@@ -84,10 +82,10 @@ public class PlayerRespawnController : MonoBehaviour
         isDying = false;
 
         // 触发重生事件（Flag会处理位置重置）
-        onPlayerRespawn?.Invoke(this.transform);
+        GameEvents.OnPlayerRespawn?.Invoke(this.transform);
 
         // 如果没有任何监听者（没有激活的检查点），使用备用位置
-        if (useStartPositionAsFallback && onPlayerRespawn == null)
+        if (useStartPositionAsFallback && GameEvents.OnPlayerRespawn == null)
         {
             transform.position = startPosition;
             Debug.Log("没有激活的检查点，重生在起始位置");
@@ -145,6 +143,6 @@ public class PlayerRespawnController : MonoBehaviour
         }
 
         currentFlag = newflag;
-        currentFlag.Activate(this);
+        currentFlag.Activate();
     }
 }

@@ -1,50 +1,49 @@
 using System.Collections;
 using UnityEngine;
 
+
 [RequireComponent(typeof(ThemeController))]
-public class FakeWall : GridObject, IBulletInteract
+public class LockWall : GridObject, IBulletInteract
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    [SerializeField] private Sprite imitationSprite;
     [SerializeField] private Sprite solidSprite;
     [SerializeField] private Sprite brokenSprite;
 
-    [SerializeField] private bool isImitateOn = true;
 
     [Header("破碎效果设置")]
     [SerializeField] private float breakForce = 10f; // 破碎力度
     [SerializeField] private float breakTorque = 200f; // 旋转力度
     [SerializeField] private float fallDuration = 5f; // 掉落持续时间
     [SerializeField] private GameObject breakPiecePrefab;
+    [SerializeField] private BulletModifier lockType;//虽然很难绷但是能用，得改改
 
     private SpriteRenderer spriteRenderer;
     private bool isBroken = false;
     public bool IsBroken => isBroken;
-    private FakeWallGroup fakeWallGroup;
+    private LockWallGroup LockWallGroup;
     private BoxCollider2D boxCollider2D;
 
     protected override void Start()
     {
         base.Start();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        fakeWallGroup = GetComponentInParent<FakeWallGroup>();
+        LockWallGroup = GetComponentInParent<LockWallGroup>();
         boxCollider2D = GetComponent<BoxCollider2D>();
 
 
-        if (fakeWallGroup == null)
+        if (LockWallGroup == null)
         {
             Debug.LogWarning("fakewall has no group");
         }
-        fakeWallGroup.triggerBreak += BreakWall;
-        fakeWallGroup.triggerRecover += Recover;
+        LockWallGroup.triggerBreak += BreakWall;
+        LockWallGroup.triggerRecover += Recover;
     }
 
     public void BreakWall()
     {
-        StartCoroutine(BreakEffect(isImitateOn));
+        StartCoroutine(BreakEffect());
 
 
-        isImitateOn = false;
         isBroken = true;
         spriteRenderer.sprite = brokenSprite;
 
@@ -62,24 +61,17 @@ public class FakeWall : GridObject, IBulletInteract
         //但是是不是干脆不recover更加有趣一点
         isBroken = false;
         boxCollider2D.enabled = true;
-        if (isImitateOn)
-        {
-            spriteRenderer.sprite = imitationSprite;
-        }
-        else
-        {
-            spriteRenderer.sprite = solidSprite;
-        }
+        spriteRenderer.sprite = solidSprite;
 
     }
 
     public void OnHit(OnHitInfo onHitInfo)
     {
         //tell parent
-        if (!isBroken)//ofc it is not broken
+        if (!isBroken && onHitInfo.Bullet.Modifier == this.lockType)//ofc it is not broken
         {
             onHitInfo.Bullet.ToggleTeleport(false);
-            fakeWallGroup.TriggerBreakAll();
+            LockWallGroup.TriggerBreakAll();
         }
     }
 
@@ -88,13 +80,13 @@ public class FakeWall : GridObject, IBulletInteract
         return true;
     }
 
-    private IEnumerator BreakEffect(bool isImitate)
+    private IEnumerator BreakEffect()
     {
         GameObject brokenPiece = Instantiate(breakPiecePrefab, transform.position, transform.rotation);
         
         // 添加 SpriteRenderer
         SpriteRenderer pieceRenderer = brokenPiece.GetComponent<SpriteRenderer>();
-        pieceRenderer.sprite = isImitateOn ? imitationSprite : solidSprite;
+        pieceRenderer.sprite = solidSprite;
         
         // 施加一个随机方向的力（向下偏移）
         Vector2 randomDirection = new Vector2(

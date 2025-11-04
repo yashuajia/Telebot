@@ -1,7 +1,6 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class DragEnabler : GridObject, IInteract
+public class DragEnabler : GridObject, IInteract, IBulletInteract
 {
     private bool isDragEnabled = false;
 
@@ -62,6 +61,7 @@ public class DragEnabler : GridObject, IInteract
         upArrowHint.SetActive(false);
     }
 
-
+    public void OnHit(OnHitInfo hitInfo) { }
+    public bool IsBlockBullet(OnHitInfo onHitInfo) => false;
 
 }
