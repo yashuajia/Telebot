@@ -6,7 +6,7 @@
 
 **中文** · [English](README.md)
 
-[▶ 浏览器试玩](TODO) · [⬇ 下载版本](TODO) · [🎬 游玩视频](https://www.bilibili.com/video/BV1Lh7P6JEBJ)
+[⬇ 下载版本](https://om0rl.itch.io/telebot) · [🎬 游玩视频](https://www.bilibili.com/video/BV1Lh7P6JEBJ)
 
 ![传送弹](TODO_teleport.gif)
 
@@ -138,4 +138,4 @@ Telebot 同时使用两者。**`GridManager`** 是一个单例，维护关卡的
 
 ---
 
-*个人项目，作者 Guanyu Chen。欢迎反馈。*
+*个人项目，作者 Yashuajia。欢迎反馈。*
