@@ -8,7 +8,7 @@
 
 [⬇ 下载版本](https://om0rl.itch.io/telebot) · [🎬 游玩视频](https://www.bilibili.com/video/BV1Lh7P6JEBJ)
 
-![传送弹](TODO_teleport.gif)
+![传送弹](teleport.gif)
 
 ---
 
