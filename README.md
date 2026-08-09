@@ -8,7 +8,7 @@ You wake up as a robot in a scrapyard, and find you can teleport. Everything els
 
  [⬇ Download build](https://om0rl.itch.io/telebot) · [🎬 Gameplay video](https://www.bilibili.com/video/BV1Lh7P6JEBJ)
 
-![Teleport bullet](TODO_teleport.gif)
+![Teleport bullet](teleport.gif)
 
 ---
 
